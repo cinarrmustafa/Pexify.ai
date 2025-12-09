@@ -1,9 +1,12 @@
+
 import React, { useEffect, useState } from 'react';
 import { Menu, X, Check, ChevronRight, FileCheck, Globe, TrendingUp, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { Button } from './components/Button';
 import { LiveDemo } from './components/LiveDemo';
 import { LoginPage } from './components/LoginPage';
 import { SignUpPage } from './components/SignUpPage';
+import { DashboardPage } from './components/DashboardPage';
+import { PaymentPage } from './components/PaymentPage';
 
 // --- Translations ---
 
@@ -57,13 +60,14 @@ const translations = {
     },
     features: {
       f1: {
-        title: "Deep Context Understanding",
-        desc: "Pexify doesn't just read text; it understands textile context. It distinguishes between Gross Weight, Net Weight, and Cone Weight, ensuring your packing lists adhere to international logic.",
-        list: ["99.9% Extraction Accuracy", "Multi-language Support", "Instant validation"]
+        title: "AI That Truly “Understands” Textile Documents",
+        desc: "Pexify doesn't just do OCR. It distinguishes textile-specific fields like Gross, Net, and Cone Weight, catching even the smallest errors in your documents. It validates in 1 second what takes hours manually.",
+        list: ["Ultra-precise data extraction", "Document-specific context reading", "Automated compliance checks"]
       },
       f2: {
-        title: "Lot & Batch Tracking",
-        desc: "Automatically verify that every roll, bale, or carton matches the specific Lot Number requested by the buyer. Prevent mixing lots and facing rejection upon arrival."
+        title: "Automated Document Comparison",
+        desc: "Don't review export documents one by one. Pexify automatically compares all values between documents like Invoices – Bills of Lading – Packing Lists – COs and flags inconsistencies. It prevents cost errors, customs delays, and high penalties before they occur.",
+        list: ["Scans multiple documents simultaneously", "Flags inconsistent and mismatched fields", "Generates reports in seconds"]
       }
     },
     pricing: {
@@ -96,15 +100,15 @@ const translations = {
       madeFor: "Made for Global Trade",
       productLinks: [
         { label: "Features", href: "#features" },
-        { label: "Integrations", href: "#" },
+        { label: "Integrations", href: "#workflow" },
         { label: "Pricing", href: "#pricing" },
-        { label: "Changelog", href: "#" }
+        { label: "Changelog", href: "#changelog" }
       ],
       companyLinks: [
-        { label: "About", href: "#" },
-        { label: "Contact", href: "#" },
-        { label: "Privacy Policy", href: "#" },
-        { label: "Terms of Service", href: "#" }
+        { label: "About", href: "#overview" },
+        { label: "Contact", href: "mailto:info@pexify.ai" },
+        { label: "Privacy Policy", href: "#privacy" },
+        { label: "Terms of Service", href: "#terms" }
       ]
     }
   },
@@ -157,13 +161,14 @@ const translations = {
     },
     features: {
       f1: {
-        title: "Derin Bağlam Anlama",
-        desc: "Pexify sadece metni okumaz; tekstil bağlamını anlar. Brüt Ağırlık, Net Ağırlık ve Masura Ağırlığı arasındaki farkı ayırt ederek çeki listelerinizin uluslararası mantığa uygun olmasını sağlar.",
-        list: ["%99.9 Çıkarma Doğruluğu", "Çoklu Dil Desteği", "Anında doğrulama"]
+        title: "Tekstil Evraklarını Gerçekten “Anlayan” AI",
+        desc: "Pexify, sadece OCR yapmaz. Brüt, Net ve Masura Ağırlığı gibi tekstile özgü alanları ayırt ederek belgelerinizdeki en küçük hatayı bile yakalar. Elle kontrolün saatler süren işini, 1 saniyede doğrular.",
+        list: ["Ultra hassas veri çıkarma", "Belgeye özgü bağlam okuma", "Otomatik uyumluluk kontrolü"]
       },
       f2: {
-        title: "Lot & Parti Takibi",
-        desc: "Her bir top, balya veya kolinin alıcı tarafından talep edilen belirli Lot Numarası ile eşleştiğini otomatik olarak doğrulayın. Lotların karışmasını ve varışta reddedilmesini önleyin."
+        title: "Otomatik Evrak Karşılaştırma",
+        desc: "Tüm ihracat belgelerini tek tek incelemeyin. Pexify, Fatura – Konşimento – Çeki Listesi – Packing List – CO gibi belgeler arasındaki tüm değerleri otomatik olarak karşılaştırır ve tutarsızlıkları işaretler. Maliyet hatalarını, gümrük gecikmelerini ve yüksek cezaları daha oluşmadan engeller.",
+        list: ["Aynı anda birçok belgeyi tarar", "Tutarsız ve eşleşmeyen alanları işaretler", "Saniyeler içinde rapor üretir"]
       }
     },
     pricing: {
@@ -196,22 +201,22 @@ const translations = {
       madeFor: "Küresel Ticaret için Üretildi",
       productLinks: [
         { label: "Özellikler", href: "#features" },
-        { label: "Entegrasyonlar", href: "#" },
+        { label: "Entegrasyonlar", href: "#workflow" },
         { label: "Fiyatlandırma", href: "#pricing" },
-        { label: "Sürüm Notları", href: "#" }
+        { label: "Sürüm Notları", href: "#changelog" }
       ],
       companyLinks: [
-        { label: "Hakkında", href: "#" },
-        { label: "İletişim", href: "#" },
-        { label: "Gizlilik Politikası", href: "#" },
-        { label: "Kullanım Şartları", href: "#" }
+        { label: "Hakkında", href: "#overview" },
+        { label: "İletişim", href: "mailto:info@pexify.ai" },
+        { label: "Gizlilik Politikası", href: "#privacy" },
+        { label: "Kullanım Şartları", href: "#terms" }
       ]
     }
   }
 };
 
 type Language = 'en' | 'tr';
-type View = 'landing' | 'login' | 'signup';
+type View = 'landing' | 'login' | 'signup' | 'dashboard' | 'payment';
 
 // --- Sub Components for Layout ---
 
@@ -219,7 +224,7 @@ const NavBar = ({
   lang, 
   setLang, 
   onLoginClick, 
-  onSignupClick,
+  onSignupClick, 
   onHomeClick 
 }: { 
   lang: Language, 
@@ -261,16 +266,20 @@ const NavBar = ({
 
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-black/80 backdrop-blur-md border-b border-neutral-800 py-4' : 'bg-transparent py-6'}`}>
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+      <div className="w-full px-6 md:px-8 flex items-center justify-between">
         <div className="flex items-center gap-3 group cursor-pointer" onClick={scrollToTop}>
-          <span className="text-2xl font-bold tracking-tight text-white">Pexify<span className="text-[#C1FF72]">.ai</span></span>
+          <span className="text-2xl font-bold tracking-tight">
+            <span className="text-[#ffffff]">Pe</span>
+            <span className="text-[#dffebc]">x</span>
+            <span className="text-[#c1ff72]">ify</span>
+          </span>
         </div>
 
         <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-neutral-400">
-          <button onClick={scrollToTop} className="hover:text-white transition-colors">{t.overview}</button>
-          <button onClick={() => scrollToSection('problem')} className="hover:text-white transition-colors">{t.problem}</button>
           <button onClick={() => scrollToSection('live-demo')} className="hover:text-white transition-colors">{t.howItWorks}</button>
           <button onClick={() => scrollToSection('features')} className="hover:text-white transition-colors">{t.features}</button>
+          <button onClick={scrollToTop} className="hover:text-white transition-colors">{t.overview}</button>
+          <button onClick={() => scrollToSection('problem')} className="hover:text-white transition-colors">{t.problem}</button>
           <button onClick={() => scrollToSection('pricing')} className="hover:text-white transition-colors">{t.pricing}</button>
         </div>
 
@@ -325,16 +334,6 @@ const Hero = ({ lang, onSignupClick }: { lang: Language, onSignupClick: () => vo
   const t = translations[lang].hero;
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden bg-black">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="/image.png" 
-          alt="Textile Background" 
-          className="w-full h-full object-cover opacity-40" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black"></div>
-      </div>
-
       <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
         <div className="inline-flex items-center px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/50 backdrop-blur-sm mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <span className="w-1.5 h-1.5 rounded-full bg-[#C1FF72] mr-2 animate-pulse"></span>
@@ -397,7 +396,7 @@ const WhatIsSection = ({ lang }: { lang: Language }) => {
   );
 };
 
-const ProblemCard = ({ title, desc, icon: Icon }: { title: string, desc: string, icon: any }) => (
+const ProblemCard: React.FC<{ title: string, desc: string, icon: any }> = ({ title, desc, icon: Icon }) => (
   <div className="group p-8 rounded-3xl bg-[#0A0A0A] border border-neutral-800 hover:border-[#C1FF72]/50 transition-all duration-500 hover:-translate-y-1">
     <div className="w-12 h-12 rounded-full bg-neutral-900 flex items-center justify-center mb-6 group-hover:bg-[#C1FF72] transition-colors duration-300">
       <Icon className="w-6 h-6 text-white group-hover:text-black transition-colors" strokeWidth={1.5} />
@@ -434,7 +433,7 @@ const ProblemSection = ({ lang }: { lang: Language }) => {
   );
 };
 
-const WorkflowStep = ({ number, title, desc }: { number: string, title: string, desc: string }) => (
+const WorkflowStep: React.FC<{ number: string, title: string, desc: string }> = ({ number, title, desc }) => (
   <div className="relative pl-12 md:pl-0 md:text-center group">
     <div className="absolute left-0 top-0 md:relative md:mx-auto w-10 h-10 flex items-center justify-center rounded-full border border-neutral-800 bg-black text-[#C1FF72] font-mono text-lg font-bold mb-6 z-10 group-hover:bg-[#C1FF72] group-hover:text-black transition-colors">
       {number}
@@ -528,6 +527,7 @@ const FeaturesSection = ({ lang }: { lang: Language }) => {
         <FeatureRow 
           title={t.f2.title} 
           desc={t.f2.desc}
+          list={t.f2.list}
           reversed
         />
       </div>
@@ -535,7 +535,7 @@ const FeaturesSection = ({ lang }: { lang: Language }) => {
   );
 };
 
-const PricingCard = ({ tier, price, period, features, btnText, recommended = false, badgeText, onSignupClick }: { tier: string, price: string, period: string, features: string[], btnText: string, recommended?: boolean, badgeText?: string, onSignupClick: () => void }) => (
+const PricingCard = ({ tier, price, period, features, btnText, recommended = false, badgeText, onPlanSelect }: { tier: string, price: string, period: string, features: string[], btnText: string, recommended?: boolean, badgeText?: string, onPlanSelect: (plan: string, price: string, period: string) => void }) => (
   <div className={`relative p-8 rounded-3xl border flex flex-col h-full transition-all duration-300 ${recommended ? 'bg-neutral-900/50 border-[#C1FF72] shadow-[0_0_30px_rgba(193,255,114,0.1)] transform md:-translate-y-4' : 'bg-[#0A0A0A] border-neutral-800 hover:border-neutral-700'}`}>
     {recommended && (
       <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#C1FF72] text-black text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
@@ -557,13 +557,13 @@ const PricingCard = ({ tier, price, period, features, btnText, recommended = fal
         </li>
       ))}
     </ul>
-    <Button variant={recommended ? 'primary' : 'outline'} className="w-full" onClick={onSignupClick}>
+    <Button variant={recommended ? 'primary' : 'outline'} className="w-full" onClick={() => onPlanSelect(tier, price, period)}>
       {btnText}
     </Button>
   </div>
 );
 
-const PricingSection = ({ lang, onSignupClick }: { lang: Language, onSignupClick: () => void }) => {
+const PricingSection = ({ lang, onPlanSelect }: { lang: Language, onPlanSelect: (plan: string, price: string, period: string) => void }) => {
   const t = translations[lang].pricing;
   return (
     <section id="pricing" className="py-24 bg-black relative border-t border-neutral-900">
@@ -579,7 +579,7 @@ const PricingSection = ({ lang, onSignupClick }: { lang: Language, onSignupClick
             period={t.tiers[0].period}
             btnText={t.tiers[0].btn}
             features={t.tiers[0].features} 
-            onSignupClick={onSignupClick}
+            onPlanSelect={onPlanSelect}
           />
           <PricingCard 
             tier={t.tiers[1].name} 
@@ -589,7 +589,7 @@ const PricingSection = ({ lang, onSignupClick }: { lang: Language, onSignupClick
             recommended
             badgeText={t.badge}
             features={t.tiers[1].features}
-            onSignupClick={onSignupClick} 
+            onPlanSelect={onPlanSelect} 
           />
           <PricingCard 
             tier={t.tiers[2].name} 
@@ -597,7 +597,7 @@ const PricingSection = ({ lang, onSignupClick }: { lang: Language, onSignupClick
             period={t.tiers[2].period}
             btnText={t.tiers[2].btn}
             features={t.tiers[2].features}
-            onSignupClick={onSignupClick} 
+            onPlanSelect={onPlanSelect} 
           />
         </div>
       </div>
@@ -605,48 +605,22 @@ const PricingSection = ({ lang, onSignupClick }: { lang: Language, onSignupClick
   );
 };
 
-const Footer = ({ lang, onLoginClick }: { lang: Language, onLoginClick: () => void }) => {
-  const t = translations[lang].footer;
+const SecuritySection = ({ lang }: { lang: Language }) => {
+  const t = translations[lang].security;
   return (
-    <footer className="bg-[#050505] border-t border-neutral-900 pt-20 pb-10">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid md:grid-cols-4 gap-12 mb-16">
-          <div className="col-span-2">
-            <div className="flex items-center gap-2 mb-6">
-              <span className="text-lg font-bold text-white">Pexify.ai</span>
+    <section className="py-24 border-y border-neutral-900 bg-[#050505]">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+            <ShieldCheck className="w-12 h-12 text-[#C1FF72] mx-auto mb-6" />
+            <h2 className="text-3xl font-semibold mb-8">{t.title}</h2>
+            <p className="text-neutral-400 max-w-2xl mx-auto mb-12">{t.desc}</p>
+            <div className="flex justify-center gap-8 opacity-50 grayscale">
+                {/* Mock Compliance Badges */}
+                <div className="h-12 w-24 bg-neutral-800 rounded"></div>
+                <div className="h-12 w-24 bg-neutral-800 rounded"></div>
+                <div className="h-12 w-24 bg-neutral-800 rounded"></div>
             </div>
-            <p className="text-neutral-500 max-w-xs leading-relaxed">
-              {t.desc}
-            </p>
-          </div>
-          
-          <div>
-            <h4 className="text-white font-semibold mb-6">{t.col1}</h4>
-            <ul className="space-y-4 text-sm text-neutral-500">
-              {t.productLinks.map((link: any, i: number) => (
-                <li key={i}><a href={link.href} className="hover:text-[#C1FF72] transition-colors">{link.label}</a></li>
-              ))}
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="text-white font-semibold mb-6">{t.col2}</h4>
-            <ul className="space-y-4 text-sm text-neutral-500">
-              {t.companyLinks.map((link: any, i: number) => (
-                <li key={i}><a href={link.href} className="hover:text-[#C1FF72] transition-colors">{link.label}</a></li>
-              ))}
-            </ul>
-          </div>
         </div>
-        
-        <div className="pt-8 border-t border-neutral-900 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-neutral-600">
-          <p>{t.copyright}</p>
-          <div className="flex items-center gap-6">
-             <span>{t.madeFor}</span>
-          </div>
-        </div>
-      </div>
-    </footer>
+    </section>
   );
 };
 
@@ -682,22 +656,105 @@ const CTASection = ({ lang, onSignupClick }: { lang: Language, onSignupClick: ()
   );
 };
 
-const SecuritySection = ({ lang }: { lang: Language }) => {
-  const t = translations[lang].security;
+const LegalModal = ({ id, lang, onClose }: { id: string, lang: Language, onClose: () => void }) => {
+  // Simple modal content based on ID
+  const title = id === '#privacy' ? (lang === 'tr' ? 'Gizlilik Politikası' : 'Privacy Policy') : (lang === 'tr' ? 'Kullanım Şartları' : 'Terms of Service');
+  
   return (
-    <section className="py-24 border-y border-neutral-900 bg-[#050505]">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-            <ShieldCheck className="w-12 h-12 text-[#C1FF72] mx-auto mb-6" />
-            <h2 className="text-3xl font-semibold mb-8">{t.title}</h2>
-            <p className="text-neutral-400 max-w-2xl mx-auto mb-12">{t.desc}</p>
-            <div className="flex justify-center gap-8 opacity-50 grayscale">
-                {/* Mock Compliance Badges */}
-                <div className="h-12 w-24 bg-neutral-800 rounded"></div>
-                <div className="h-12 w-24 bg-neutral-800 rounded"></div>
-                <div className="h-12 w-24 bg-neutral-800 rounded"></div>
-            </div>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="bg-[#0F0F0F] border border-neutral-800 rounded-3xl w-full max-w-2xl relative z-10 shadow-2xl flex flex-col max-h-[80vh]">
+        <div className="p-6 border-b border-neutral-800 flex items-center justify-between">
+            <h3 className="text-xl font-semibold text-white">{title}</h3>
+            <button onClick={onClose} className="text-neutral-500 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+            </button>
         </div>
-    </section>
+        <div className="p-6 overflow-y-auto text-neutral-400 text-sm leading-relaxed custom-scrollbar">
+            <p>
+                {lang === 'tr' 
+                    ? "Bu bir demo uygulamasıdır. Gerçek bir yasal metin buraya gelecektir. Kişisel verilerinizin işlenmesi ve hizmet şartları hakkında detaylı bilgi."
+                    : "This is a demo application. Actual legal text would appear here. Detailed information regarding personal data processing and terms of service."
+                }
+            </p>
+            <p className="mt-4">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            </p>
+        </div>
+        <div className="p-6 border-t border-neutral-800 flex justify-end">
+            <Button onClick={onClose}>
+                {lang === 'tr' ? 'Kapat' : 'Close'}
+            </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Footer = ({ lang, onLoginClick, onOpenLegal }: { lang: Language, onLoginClick: () => void, onOpenLegal: (id: string) => void }) => {
+  const t = translations[lang].footer;
+  return (
+    <footer className="bg-[#050505] border-t border-neutral-900 pt-20 pb-10">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid md:grid-cols-4 gap-12 mb-16">
+          <div className="col-span-2">
+            <span className="text-2xl font-bold tracking-tight mb-6 block">
+              <span className="text-[#ffffff]">Pe</span>
+              <span className="text-[#dffebc]">x</span>
+              <span className="text-[#c1ff72]">ify</span>
+            </span>
+            <p className="text-neutral-400 max-w-sm mb-8 leading-relaxed">
+              {t.desc}
+            </p>
+            <div className="flex gap-4">
+                {/* Social Icons Placeholder */}
+                <div className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center hover:bg-[#C1FF72] hover:text-black transition-colors cursor-pointer text-neutral-400">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center hover:bg-[#C1FF72] hover:text-black transition-colors cursor-pointer text-neutral-400">
+                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center hover:bg-[#C1FF72] hover:text-black transition-colors cursor-pointer text-neutral-400">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.047-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.067-.06-1.407-.06-4.123v-.08c0-2.643.012-2.987.06-4.043.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772 4.902 4.902 0 011.772-1.153c.636-.247 1.363-.416 2.427-.465 1.067-.047 1.407-.06 4.123-.06h.08zm-4.123 4.606c-.846-.061-1.543.483-1.635 1.262-.036.316.037.628.2.898a3 3 0 00.415.546c.3.3.664.519 1.064.63.4.111.823.13 1.237.054.413-.076.797-.268 1.108-.553.311-.285.548-.655.678-1.06.13-.406.16-.838.087-1.258a3 3 0 00-.532-1.116 3 3 0 00-.91-.715c-.328-.158-.69-.235-1.055-.224-.225.006-.448.041-.657.104zM12 7.078a4.922 4.922 0 100 9.844 4.922 4.922 0 000-9.844zm0 1.64a3.28 3.28 0 110 6.56 3.28 3.28 0 010-6.56z" clipRule="evenodd" /></svg>
+                </div>
+            </div>
+          </div>
+          <div>
+            <h4 className="text-white font-semibold mb-6">{t.col1}</h4>
+            <ul className="space-y-4">
+              {t.productLinks.map((link: any, i: number) => (
+                <li key={i}>
+                  <a href={link.href} className="text-neutral-500 hover:text-[#C1FF72] transition-colors text-sm">{link.label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white font-semibold mb-6">{t.col2}</h4>
+            <ul className="space-y-4">
+              {t.companyLinks.map((link: any, i: number) => (
+                <li key={i}>
+                    {link.href.startsWith('#') ? (
+                        <button onClick={() => onOpenLegal(link.href)} className="text-neutral-500 hover:text-[#C1FF72] transition-colors text-sm text-left">
+                            {link.label}
+                        </button>
+                    ) : (
+                        <a href={link.href} className="text-neutral-500 hover:text-[#C1FF72] transition-colors text-sm">{link.label}</a>
+                    )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="pt-8 border-t border-neutral-900 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-neutral-600 text-sm">{t.copyright}</p>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-[#C1FF72] rounded-full"></span>
+            <span className="text-neutral-500 text-sm">{t.madeFor}</span>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 };
 
@@ -706,6 +763,8 @@ const SecuritySection = ({ lang }: { lang: Language }) => {
 const App: React.FC = () => {
   const [language, setLanguage] = useState<Language>('en');
   const [currentView, setCurrentView] = useState<View>('landing');
+  const [legalModalId, setLegalModalId] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<{name: string, price: string, period: string} | null>(null);
 
   useEffect(() => {
     // Scroll to top on view change
@@ -713,6 +772,26 @@ const App: React.FC = () => {
   }, [currentView]);
 
   const handleSignup = () => {
+    // Direct signup without selecting a plan first (e.g. from hero)
+    setSelectedPlan(null);
+    setCurrentView('signup');
+  };
+
+  const handlePlanSelection = (plan: string, price: string, period: string) => {
+    // If it's a "Custom" plan, we might want a different flow (e.g. contact sales), 
+    // but for now we route to signup with context or mock payment if needed.
+    // Per request: Pricing -> Payment -> Signup -> Dashboard.
+    if (price === 'Custom' || price === 'Özel') {
+        // Skip payment for Enterprise/Custom, go to signup or contact
+        setSelectedPlan({ name: plan, price, period });
+        setCurrentView('signup');
+    } else {
+        setSelectedPlan({ name: plan, price, period });
+        setCurrentView('payment');
+    }
+  };
+
+  const handlePaymentSuccess = () => {
     setCurrentView('signup');
   };
 
@@ -720,15 +799,39 @@ const App: React.FC = () => {
     setCurrentView('login');
   };
 
+  const handleDashboardRedirect = () => {
+    setCurrentView('dashboard');
+  }
+
   const renderView = () => {
     switch (currentView) {
+      case 'dashboard':
+        return (
+          <DashboardPage 
+            lang={language}
+            onLogout={() => setCurrentView('landing')}
+            setLang={setLanguage}
+          />
+        );
       case 'login':
         return (
           <LoginPage 
             lang={language} 
             onBack={() => setCurrentView('landing')}
             onSignupClick={handleSignup}
+            onLoginSuccess={handleDashboardRedirect}
           />
+        );
+      case 'payment':
+        return (
+            <PaymentPage
+                lang={language}
+                plan={selectedPlan?.name || ''}
+                price={selectedPlan?.price || ''}
+                period={selectedPlan?.period || ''}
+                onBack={() => setCurrentView('landing')}
+                onContinue={handlePaymentSuccess}
+            />
         );
       case 'signup':
         return (
@@ -736,6 +839,8 @@ const App: React.FC = () => {
             lang={language} 
             onBack={() => setCurrentView('landing')}
             onLoginClick={handleLogin}
+            onSignupSuccess={handleDashboardRedirect}
+            selectedPlan={selectedPlan?.name}
           />
         );
       default:
@@ -755,14 +860,22 @@ const App: React.FC = () => {
               <LiveDemo lang={language} />
               <WorkflowSection lang={language} />
               <FeaturesSection lang={language} />
-              <PricingSection lang={language} onSignupClick={handleSignup} />
+              <PricingSection lang={language} onPlanSelect={handlePlanSelection} />
               <SecuritySection lang={language} />
               <CTASection lang={language} onSignupClick={handleSignup} />
             </main>
             <Footer 
               lang={language} 
               onLoginClick={handleLogin}
+              onOpenLegal={setLegalModalId}
             />
+            {legalModalId && (
+              <LegalModal 
+                id={legalModalId} 
+                lang={language} 
+                onClose={() => setLegalModalId(null)} 
+              />
+            )}
           </>
         );
     }

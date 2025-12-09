@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ArrowLeft, Mail, Lock, Loader2, Eye, EyeOff } from 'lucide-react';
 import { Button } from './Button';
@@ -6,9 +7,10 @@ interface LoginPageProps {
   lang: 'en' | 'tr';
   onBack: () => void;
   onSignupClick: () => void;
+  onLoginSuccess?: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClick }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClick, onLoginSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -26,7 +28,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
       noAccount: "Don't have an account?",
       signUp: "Start Free Trial",
       google: "Continue with Google",
-      sso: "Continue with SSO"
+      sso: "Continue with SSO",
+      continueWith: "OR"
     },
     tr: {
       back: "Ana Sayfaya Dön",
@@ -41,7 +44,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
       noAccount: "Hesabınız yok mu?",
       signUp: "Ücretsiz Deneyin",
       google: "Google ile Devam Et",
-      sso: "SSO ile Devam Et"
+      sso: "SSO ile Devam Et",
+      continueWith: "VEYA"
     }
   };
 
@@ -51,7 +55,58 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
     e.preventDefault();
     setIsLoading(true);
     // Simulate API call
-    setTimeout(() => setIsLoading(false), 2000);
+    setTimeout(() => {
+        setIsLoading(false);
+        if (onLoginSuccess) onLoginSuccess();
+    }, 1500);
+  };
+
+  const handleGoogleLogin = () => {
+    setIsLoading(true);
+    
+    // Calculate center of screen
+    const width = 500;
+    const height = 600;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+
+    // Open Google Sign-in Popup
+    const popup = window.open(
+        'https://accounts.google.com/signin', 
+        'google_login', 
+        `width=${width},height=${height},left=${left},top=${top}`
+    );
+
+    // Simulate Auth Flow Completion (Redirect back)
+    setTimeout(() => {
+        if (popup) popup.close(); // Close the popup to simulate redirecting back to app
+        setIsLoading(false);
+        if (onLoginSuccess) onLoginSuccess();
+    }, 2500);
+  };
+
+  const handleSSOLogin = () => {
+    setIsLoading(true);
+    
+    // Calculate center of screen
+    const width = 500;
+    const height = 600;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+
+    // Open SSO Provider Popup (Simulating Microsoft/Enterprise Login)
+    const popup = window.open(
+        'https://login.microsoftonline.com/', 
+        'sso_login', 
+        `width=${width},height=${height},left=${left},top=${top}`
+    );
+
+    // Simulate SSO Auth Flow Completion
+    setTimeout(() => {
+        if (popup) popup.close();
+        setIsLoading(false);
+        if (onLoginSuccess) onLoginSuccess();
+    }, 2500);
   };
 
   return (
@@ -60,7 +115,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#C1FF72] rounded-full mix-blend-multiply filter blur-[120px] opacity-10 animate-pulse"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-white rounded-full mix-blend-overlay filter blur-[120px] opacity-5"></div>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-denim-3.png')] opacity-30"></div>
       </div>
 
       {/* Header / Back Button */}
@@ -79,8 +133,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <div className="flex items-center gap-4">
-              <span className="text-4xl font-bold tracking-tight text-white">Pexify<span className="text-[#C1FF72]">.ai</span></span>
+            <div className="flex flex-col items-center gap-4">
+              <span className="text-4xl font-bold tracking-tight text-center">
+                <span className="text-[#ffffff]">Pe</span>
+                <span className="text-[#dffebc]">x</span>
+                <span className="text-[#c1ff72]">ify</span>
+              </span>
             </div>
           </div>
 
@@ -105,14 +163,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium text-neutral-300 flex items-center gap-2">
-                    <Lock className="w-3.5 h-3.5 text-[#C1FF72]" />
-                    {text.passLabel}
-                  </label>
-                  <a href="#" className="text-xs text-neutral-400 hover:text-[#C1FF72] transition-colors">{text.forgot}</a>
-                </div>
+              <div className="space-y-1.5 relative">
+                <label className="text-sm font-medium text-neutral-300 flex items-center gap-2">
+                  <Lock className="w-3.5 h-3.5 text-[#C1FF72]" />
+                  {text.passLabel}
+                </label>
+                
                 <div className="relative">
                   <input 
                     type={showPassword ? "text" : "password"}
@@ -128,6 +184,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+
+                <a href="#" className="absolute top-0 right-0 text-xs text-neutral-400 hover:text-[#C1FF72] transition-colors">{text.forgot}</a>
               </div>
 
               <Button 
@@ -144,12 +202,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
                 <div className="w-full border-t border-neutral-800"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-[#0A0A0A] px-2 text-neutral-600">Or continue with</span>
+                <span className="bg-[#0A0A0A] px-2 text-neutral-600">{text.continueWith}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <button className="flex items-center justify-center h-10 px-4 border border-neutral-800 rounded-lg bg-[#0F0F0F] text-white text-sm hover:bg-neutral-800 transition-colors">
+              <button 
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={isLoading}
+                className="flex items-center justify-center h-10 px-4 border border-neutral-800 rounded-lg bg-[#0F0F0F] text-white text-sm hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -158,7 +221,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
                 </svg>
                 Google
               </button>
-              <button className="flex items-center justify-center h-10 px-4 border border-neutral-800 rounded-lg bg-[#0F0F0F] text-white text-sm hover:bg-neutral-800 transition-colors">
+              <button 
+                type="button"
+                onClick={handleSSOLogin}
+                disabled={isLoading}
+                className="flex items-center justify-center h-10 px-4 border border-neutral-800 rounded-lg bg-[#0F0F0F] text-white text-sm hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 SSO
               </button>
             </div>

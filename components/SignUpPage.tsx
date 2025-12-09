@@ -1,22 +1,25 @@
+
 import React, { useState } from 'react';
-import { ArrowLeft, Mail, Lock, User, Building, Loader2, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, User, Building, Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { Button } from './Button';
 
 interface SignUpPageProps {
   lang: 'en' | 'tr';
   onBack: () => void;
   onLoginClick: () => void;
+  onSignupSuccess?: () => void;
+  selectedPlan?: string;
 }
 
-export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginClick }) => {
+export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginClick, onSignupSuccess, selectedPlan }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const t = {
     en: {
-      back: "Back to Home",
-      title: "Start your 14-day free trial",
-      subtitle: "No credit card required. Cancel anytime.",
+      back: "Back",
+      title: "Create your account",
+      subtitle: "Finish setting up your account to access the dashboard.",
       nameLabel: "Full Name",
       namePlaceholder: "John Doe",
       companyLabel: "Company Name (Optional)",
@@ -25,15 +28,16 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginCli
       emailPlaceholder: "name@company.com",
       passLabel: "Password",
       passPlaceholder: "Create a password",
-      createAccount: "Create Account",
+      createAccount: "Complete Registration",
       haveAccount: "Already have an account?",
       signIn: "Sign In",
-      terms: "By creating an account, you agree to our Terms of Service and Privacy Policy."
+      terms: "By creating an account, you agree to our Terms of Service and Privacy Policy.",
+      planLabel: "Selected Plan:"
     },
     tr: {
-      back: "Ana Sayfaya Dön",
-      title: "14 günlük ücretsiz denemenizi başlatın",
-      subtitle: "Kredi kartı gerekmez. İstediğiniz zaman iptal edin.",
+      back: "Geri",
+      title: "Hesabınızı oluşturun",
+      subtitle: "Panele erişmek için hesap kurulumunuzu tamamlayın.",
       nameLabel: "Ad Soyad",
       namePlaceholder: "Ahmet Yılmaz",
       companyLabel: "Şirket Adı (Opsiyonel)",
@@ -42,10 +46,11 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginCli
       emailPlaceholder: "isim@sirket.com",
       passLabel: "Şifre",
       passPlaceholder: "Bir şifre oluşturun",
-      createAccount: "Hesap Oluştur",
+      createAccount: "Kaydı Tamamla",
       haveAccount: "Zaten hesabınız var mı?",
       signIn: "Giriş Yap",
-      terms: "Hesap oluşturarak Hizmet Şartlarımızı ve Gizlilik Politikamızı kabul etmiş olursunuz."
+      terms: "Hesap oluşturarak Hizmet Şartlarımızı ve Gizlilik Politikamızı kabul etmiş olursunuz.",
+      planLabel: "Seçilen Plan:"
     }
   };
 
@@ -55,7 +60,10 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginCli
     e.preventDefault();
     setIsLoading(true);
     // Simulate API call
-    setTimeout(() => setIsLoading(false), 2000);
+    setTimeout(() => {
+        setIsLoading(false);
+        if (onSignupSuccess) onSignupSuccess();
+    }, 2000);
   };
 
   return (
@@ -64,7 +72,6 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginCli
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
         <div className="absolute bottom-[10%] left-[-5%] w-[30%] h-[30%] bg-[#C1FF72] rounded-full mix-blend-multiply filter blur-[120px] opacity-10 animate-pulse"></div>
         <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-white rounded-full mix-blend-overlay filter blur-[120px] opacity-5"></div>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-denim-3.png')] opacity-30"></div>
       </div>
 
       {/* Header / Back Button */}
@@ -84,7 +91,11 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginCli
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <div className="flex items-center gap-4">
-              <span className="text-3xl font-bold tracking-tight text-white">Pexify<span className="text-[#C1FF72]">.ai</span></span>
+              <span className="text-3xl font-bold tracking-tight">
+                <span className="text-[#ffffff]">Pe</span>
+                <span className="text-[#dffebc]">x</span>
+                <span className="text-[#c1ff72]">ify</span>
+              </span>
             </div>
           </div>
 
@@ -93,6 +104,15 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginCli
             <div className="text-center mb-8">
               <h1 className="text-2xl font-semibold text-white mb-2">{text.title}</h1>
               <p className="text-neutral-400 text-sm">{text.subtitle}</p>
+              
+              {selectedPlan && (
+                <div className="mt-4 inline-flex items-center px-3 py-1.5 rounded-lg bg-[#C1FF72]/10 border border-[#C1FF72]/20">
+                    <span className="text-xs text-neutral-400 mr-2">{text.planLabel}</span>
+                    <span className="text-xs font-bold text-[#C1FF72] flex items-center gap-1">
+                        {selectedPlan} <CheckCircle2 className="w-3 h-3" />
+                    </span>
+                </div>
+              )}
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">

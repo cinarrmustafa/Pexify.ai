@@ -1,3 +1,5 @@
+import React from 'react';
+
 export interface Testimonial {
   quote: string;
   author: string;
