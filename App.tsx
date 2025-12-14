@@ -1,12 +1,14 @@
 
 import React, { useEffect, useState } from 'react';
-import { Menu, X, Check, ChevronRight, FileCheck, Globe, TrendingUp, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Menu, X, Check, ChevronRight, FileCheck, Globe, TrendingUp, AlertTriangle, ShieldCheck, Instagram, Facebook, Twitter } from 'lucide-react';
 import { Button } from './components/Button';
 import { LiveDemo } from './components/LiveDemo';
 import { LoginPage } from './components/LoginPage';
 import { SignUpPage } from './components/SignUpPage';
 import { DashboardPage } from './components/DashboardPage';
 import { PaymentPage } from './components/PaymentPage';
+import { ContactPage } from './components/ContactPage';
+import { ScheduleDemoPage } from './components/ScheduleDemoPage';
 
 // --- Translations ---
 
@@ -27,7 +29,7 @@ const translations = {
       headlineEnd: "export processes with AI.",
       subheadline: "An intelligent AI engine that automatically reads and compares all your textile export documents and finds errors for you.",
       ctaPrimary: "Start Free Trial",
-      ctaSecondary: "Book a Demo",
+      ctaSecondary: "Schedule Live Demo",
       trustedBy: "Trusted by exporters in:",
       countries: ["TURKEY", "INDIA", "VIETNAM", "BANGLADESH"]
     },
@@ -53,9 +55,9 @@ const translations = {
       title: "From Chaos to Clarity",
       subtitle: "Three steps to a standardized export process.",
       steps: [
-        { title: "Upload Documents", desc: "Drag and drop Invoices, Packing Lists, and BLs. Our engine processes PDFs, scans, and photos instantly." },
-        { title: "AI Analysis", desc: "Pexify extracts data and cross-references every field across all documents to find inconsistencies." },
-        { title: "One-Click Export", desc: "Receive a clean validation report. Fix errors in-app and generate a perfect set of documents." }
+        { title: "Upload Documents", desc: "Easily upload all your export documents to the system and our scanner will start reviewing them instantly." },
+        { title: "AI Analysis", desc: "Pexify extracts all important data from your documents and detects inconsistencies between this data with AI support." },
+        { title: "One-Click Export", desc: "Finally, you receive a report and easily see the erroneous parts of your documents. Thus, you solve the problem with Pexify before it even starts." }
       ]
     },
     features: {
@@ -106,7 +108,7 @@ const translations = {
       ],
       companyLinks: [
         { label: "About", href: "#overview" },
-        { label: "Contact", href: "mailto:info@pexify.ai" },
+        { label: "Contact", href: "#contact" }, 
         { label: "Privacy Policy", href: "#privacy" },
         { label: "Terms of Service", href: "#terms" }
       ]
@@ -128,7 +130,7 @@ const translations = {
       headlineEnd: "yapay zeka ile kusursuz hale getirin.",
       subheadline: "Tüm tekstil ihracat belgelerinizi otomatik olarak okuyan, karşılaştıran ve sizin için hataları bulan akıllı bir yapay zeka motoru.",
       ctaPrimary: "Ücretsiz Deneyin",
-      ctaSecondary: "Demo Talep Edin",
+      ctaSecondary: "Canlı Demo Planla",
       trustedBy: "İhracatçıların tercihi:",
       countries: ["TÜRKİYE", "HİNDİSTAN", "VİETNAM", "BANGLADEŞ"]
     },
@@ -154,9 +156,9 @@ const translations = {
       title: "Kaostan Netliğe",
       subtitle: "Standartlaştırılmış bir ihracat süreci için üç adım.",
       steps: [
-        { title: "Belgeleri Yükle", desc: "Fatura, Çeki Listesi ve Konşimentoları sürükleyip bırakın. Motorumuz PDF, tarama ve fotoğrafları anında işler." },
-        { title: "Yapay Zeka Analizi", desc: "Pexify verileri çıkarır ve tutarsızlıkları bulmak için tüm belgelerdeki her alanı çapraz referansla kontrol eder." },
-        { title: "Tek Tıkla Dışa Aktar", desc: "Temiz bir doğrulama raporu alın. Hataları uygulama içinde düzeltin ve kusursuz bir belge seti oluşturun." }
+        { title: "Belgeleri Yükle", desc: "Tüm ihracat evraklarınızı kolayca sisteme yükleyin ve tarayıcımız hızlıca incelemeye başlasın" },
+        { title: "Yapay Zeka Analizi", desc: "Pexify evraklarınızdaki tüm önemli verileri çıkartır ve bu veriler arasındaki tutarsızlıkları yapay zeka desteğiyle tespit eder." },
+        { title: "Tek Tıkla Dışa Aktar", desc: "Son olarak bir rapor alırsınız ve evraklarınızdaki hatalı kısımları kolayca görürsünüz. Böylece sorun daha başlamadan Pexify ile çözmüş olursunuz." }
       ]
     },
     features: {
@@ -169,7 +171,7 @@ const translations = {
         title: "Otomatik Evrak Karşılaştırma",
         desc: "Tüm ihracat belgelerini tek tek incelemeyin. Pexify, Fatura – Konşimento – Çeki Listesi – Packing List – CO gibi belgeler arasındaki tüm değerleri otomatik olarak karşılaştırır ve tutarsızlıkları işaretler. Maliyet hatalarını, gümrük gecikmelerini ve yüksek cezaları daha oluşmadan engeller.",
         list: ["Aynı anda birçok belgeyi tarar", "Tutarsız ve eşleşmeyen alanları işaretler", "Saniyeler içinde rapor üretir"]
-      }
+      },
     },
     pricing: {
       title: "Basit, şeffaf fiyatlandırma",
@@ -207,7 +209,7 @@ const translations = {
       ],
       companyLinks: [
         { label: "Hakkında", href: "#overview" },
-        { label: "İletişim", href: "mailto:info@pexify.ai" },
+        { label: "İletişim", href: "#contact" }, 
         { label: "Gizlilik Politikası", href: "#privacy" },
         { label: "Kullanım Şartları", href: "#terms" }
       ]
@@ -216,7 +218,7 @@ const translations = {
 };
 
 type Language = 'en' | 'tr';
-type View = 'landing' | 'login' | 'signup' | 'dashboard' | 'payment';
+type View = 'landing' | 'login' | 'signup' | 'dashboard' | 'payment' | 'contact' | 'schedule-demo';
 
 // --- Sub Components for Layout ---
 
@@ -244,14 +246,14 @@ const NavBar = ({
   }, []);
 
   const scrollToSection = (id: string) => {
-    onHomeClick(); // Ensure we are on home view
+    onHomeClick(); 
     setTimeout(() => {
       const element = document.getElementById(id);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
         setMobileMenuOpen(false);
       }
-    }, 100); // Small delay to allow render
+    }, 100); 
   };
 
   const scrollToTop = () => {
@@ -266,61 +268,66 @@ const NavBar = ({
 
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-black/80 backdrop-blur-md border-b border-neutral-800 py-4' : 'bg-transparent py-6'}`}>
-      <div className="w-full px-6 md:px-8 flex items-center justify-between">
-        <div className="flex items-center gap-3 group cursor-pointer" onClick={scrollToTop}>
-          <span className="text-2xl font-bold tracking-tight">
-            <span className="text-[#ffffff]">Pe</span>
-            <span className="text-[#dffebc]">x</span>
-            <span className="text-[#c1ff72]">ify</span>
-          </span>
-        </div>
+      <div className="w-full px-6 md:px-8 relative flex items-center justify-between">
+        
+            {/* Logo */}
+            <div className="flex items-center gap-3 group cursor-pointer z-20" onClick={scrollToTop}>
+            <span className="text-2xl font-bold tracking-tight">
+                <span className="text-[#ffffff]">Pe</span>
+                <span className="text-[#dffebc]">x</span>
+                <span className="text-[#c1ff72]">ify</span>
+            </span>
+            </div>
 
-        <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-neutral-400">
-          <button onClick={() => scrollToSection('live-demo')} className="hover:text-white transition-colors">{t.howItWorks}</button>
-          <button onClick={() => scrollToSection('features')} className="hover:text-white transition-colors">{t.features}</button>
-          <button onClick={scrollToTop} className="hover:text-white transition-colors">{t.overview}</button>
-          <button onClick={() => scrollToSection('problem')} className="hover:text-white transition-colors">{t.problem}</button>
-          <button onClick={() => scrollToSection('pricing')} className="hover:text-white transition-colors">{t.pricing}</button>
-        </div>
+            {/* Centered Navigation */}
+            <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center space-x-8 text-sm font-medium text-neutral-400">
+            <button onClick={scrollToTop} className="hover:text-white transition-colors">{t.overview}</button>
+            <button onClick={() => scrollToSection('problem')} className="hover:text-white transition-colors">{t.problem}</button>
+            <button onClick={() => scrollToSection('features')} className="hover:text-white transition-colors">{t.features}</button>
+            <button onClick={() => scrollToSection('workflow')} className="hover:text-white transition-colors">{t.howItWorks}</button>
+            <button onClick={() => scrollToSection('pricing')} className="hover:text-white transition-colors">{t.pricing}</button>
+            </div>
 
-        <div className="hidden md:flex items-center space-x-4">
-          <button 
-            onClick={toggleLang}
-            className="flex items-center gap-1 text-sm font-medium text-neutral-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-neutral-800"
-          >
-            <Globe className="w-4 h-4" />
-            <span>{lang.toUpperCase()}</span>
-          </button>
-          <div className="w-px h-4 bg-neutral-800"></div>
-          <button 
-            onClick={onLoginClick}
-            className="text-sm font-medium text-white hover:text-[#C1FF72] transition-colors"
-          >
-            {t.login}
-          </button>
-          <Button variant="primary" className="!px-5 !py-2 !text-xs" onClick={onSignupClick}>{t.getStarted}</Button>
-        </div>
+            {/* Right Side Actions */}
+            <div className="hidden md:flex items-center space-x-4 z-20">
+            <button 
+                onClick={toggleLang}
+                className="flex items-center gap-1 text-sm font-medium text-neutral-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-neutral-800"
+            >
+                <Globe className="w-4 h-4" />
+                <span>{lang.toUpperCase()}</span>
+            </button>
+            <div className="w-px h-4 bg-neutral-800"></div>
+            <button 
+                onClick={onLoginClick}
+                className="text-sm font-medium text-white hover:text-[#C1FF72] transition-colors"
+            >
+                {t.login}
+            </button>
+            <Button variant="primary" className="!px-5 !py-2 !text-xs" onClick={onSignupClick}>{t.getStarted}</Button>
+            </div>
 
-        <div className="md:hidden flex items-center gap-4">
-          <button 
-            onClick={toggleLang}
-            className="flex items-center gap-1 text-sm font-medium text-neutral-400 hover:text-white"
-          >
-            <Globe className="w-4 h-4" />
-            <span>{lang.toUpperCase()}</span>
-          </button>
-          <button className="text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X /> : <Menu />}
-          </button>
-        </div>
+            {/* Mobile Actions */}
+            <div className="md:hidden flex items-center gap-4 ml-auto z-20">
+            <button 
+                onClick={toggleLang}
+                className="flex items-center gap-1 text-sm font-medium text-neutral-400 hover:text-white"
+            >
+                <Globe className="w-4 h-4" />
+                <span>{lang.toUpperCase()}</span>
+            </button>
+            <button className="text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                {mobileMenuOpen ? <X /> : <Menu />}
+            </button>
+            </div>
       </div>
 
       {mobileMenuOpen && (
         <div className="absolute top-full left-0 w-full bg-black border-b border-neutral-800 p-6 md:hidden flex flex-col space-y-4 shadow-2xl">
           <button className="text-left text-neutral-400 hover:text-white" onClick={scrollToTop}>{t.overview}</button>
           <button className="text-left text-neutral-400 hover:text-white" onClick={() => scrollToSection('problem')}>{t.problem}</button>
-          <button className="text-left text-neutral-400 hover:text-white" onClick={() => scrollToSection('live-demo')}>{t.howItWorks}</button>
           <button className="text-left text-neutral-400 hover:text-white" onClick={() => scrollToSection('features')}>{t.features}</button>
+          <button className="text-left text-neutral-400 hover:text-white" onClick={() => scrollToSection('workflow')}>{t.howItWorks}</button>
           <button className="text-left text-neutral-400 hover:text-white" onClick={() => scrollToSection('pricing')}>{t.pricing}</button>
           <button className="text-left text-white font-medium" onClick={() => { onLoginClick(); setMobileMenuOpen(false); }}>{t.login}</button>
           <Button className="w-full justify-center" onClick={() => { onSignupClick(); setMobileMenuOpen(false); }}>{t.getStarted}</Button>
@@ -330,31 +337,31 @@ const NavBar = ({
   );
 };
 
-const Hero = ({ lang, onSignupClick }: { lang: Language, onSignupClick: () => void }) => {
+const Hero = ({ lang, onSignupClick, onScheduleDemoClick }: { lang: Language, onSignupClick: () => void, onScheduleDemoClick: () => void }) => {
   const t = translations[lang].hero;
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden bg-black">
       <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
-        <div className="inline-flex items-center px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/50 backdrop-blur-sm mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="inline-flex items-center px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/50 backdrop-blur-sm mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-[#C1FF72] mr-2 animate-pulse"></span>
           <span className="text-xs font-medium text-neutral-300 uppercase tracking-wider">{t.newBadge}</span>
         </div>
 
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tight text-white mb-8 leading-tight animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both delay-100">
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tight text-white mb-8 leading-tight">
           {t.headlineStart} <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C1FF72] to-white/70">{t.headlineEnd}</span>
         </h1>
 
-        <p className="text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both delay-200">
+        <p className="text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto mb-10 leading-relaxed">
           {t.subheadline}
         </p>
 
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both delay-300">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4">
           <Button icon onClick={onSignupClick}>{t.ctaPrimary}</Button>
-          <Button variant="secondary" onClick={() => document.getElementById('live-demo')?.scrollIntoView({ behavior: 'smooth' })}>{t.ctaSecondary}</Button>
+          <Button variant="secondary" onClick={onScheduleDemoClick}>{t.ctaSecondary}</Button>
         </div>
 
-        <div className="mt-16 pt-8 border-t border-neutral-900/50 flex flex-col md:flex-row items-center justify-center gap-8 text-neutral-500 text-sm animate-in fade-in duration-1000 delay-500">
+        <div className="mt-16 pt-8 border-t border-neutral-900/50 flex flex-col md:flex-row items-center justify-center gap-8 text-neutral-500 text-sm">
           <span>{t.trustedBy}</span>
           <div className="flex items-center gap-6 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
              {t.countries.map((country: string, idx: number) => (
@@ -691,7 +698,13 @@ const LegalModal = ({ id, lang, onClose }: { id: string, lang: Language, onClose
   );
 };
 
-const Footer = ({ lang, onLoginClick, onOpenLegal }: { lang: Language, onLoginClick: () => void, onOpenLegal: (id: string) => void }) => {
+const Footer = ({ lang, onLoginClick, onOpenLegal, onContactClick, onScrollToSection }: { 
+  lang: Language, 
+  onLoginClick: () => void, 
+  onOpenLegal: (id: string) => void, 
+  onContactClick: () => void,
+  onScrollToSection: (id: string) => void
+}) => {
   const t = translations[lang].footer;
   return (
     <footer className="bg-[#050505] border-t border-neutral-900 pt-20 pb-10">
@@ -707,16 +720,33 @@ const Footer = ({ lang, onLoginClick, onOpenLegal }: { lang: Language, onLoginCl
               {t.desc}
             </p>
             <div className="flex gap-4">
-                {/* Social Icons Placeholder */}
-                <div className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center hover:bg-[#C1FF72] hover:text-black transition-colors cursor-pointer text-neutral-400">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center hover:bg-[#C1FF72] hover:text-black transition-colors cursor-pointer text-neutral-400">
-                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center hover:bg-[#C1FF72] hover:text-black transition-colors cursor-pointer text-neutral-400">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.047-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.067-.06-1.407-.06-4.123v-.08c0-2.643.012-2.987.06-4.043.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772 4.902 4.902 0 011.772-1.153c.636-.247 1.363-.416 2.427-.465 1.067-.047 1.407-.06 4.123-.06h.08zm-4.123 4.606c-.846-.061-1.543.483-1.635 1.262-.036.316.037.628.2.898a3 3 0 00.415.546c.3.3.664.519 1.064.63.4.111.823.13 1.237.054.413-.076.797-.268 1.108-.553.311-.285.548-.655.678-1.06.13-.406.16-.838.087-1.258a3 3 0 00-.532-1.116 3 3 0 00-.91-.715c-.328-.158-.69-.235-1.055-.224-.225.006-.448.041-.657.104zM12 7.078a4.922 4.922 0 100 9.844 4.922 4.922 0 000-9.844zm0 1.64a3.28 3.28 0 110 6.56 3.28 3.28 0 010-6.56z" clipRule="evenodd" /></svg>
-                </div>
+                {/* Facebook */}
+                <a 
+                  href="https://facebook.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center hover:bg-[#C1FF72] hover:text-black transition-colors cursor-pointer text-neutral-400"
+                >
+                    <Facebook className="w-5 h-5" />
+                </a>
+                {/* Twitter */}
+                <a 
+                  href="https://twitter.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center hover:bg-[#C1FF72] hover:text-black transition-colors cursor-pointer text-neutral-400"
+                >
+                     <Twitter className="w-5 h-5" />
+                </a>
+                {/* Instagram */}
+                <a 
+                  href="https://instagram.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center hover:bg-[#C1FF72] hover:text-black transition-colors cursor-pointer text-neutral-400"
+                >
+                    <Instagram className="w-5 h-5" />
+                </a>
             </div>
           </div>
           <div>
@@ -724,7 +754,12 @@ const Footer = ({ lang, onLoginClick, onOpenLegal }: { lang: Language, onLoginCl
             <ul className="space-y-4">
               {t.productLinks.map((link: any, i: number) => (
                 <li key={i}>
-                  <a href={link.href} className="text-neutral-500 hover:text-[#C1FF72] transition-colors text-sm">{link.label}</a>
+                  <button 
+                    onClick={() => onScrollToSection(link.href)}
+                    className="text-neutral-500 hover:text-[#C1FF72] transition-colors text-sm text-left"
+                  >
+                    {link.label}
+                  </button>
                 </li>
               ))}
             </ul>
@@ -732,17 +767,22 @@ const Footer = ({ lang, onLoginClick, onOpenLegal }: { lang: Language, onLoginCl
           <div>
             <h4 className="text-white font-semibold mb-6">{t.col2}</h4>
             <ul className="space-y-4">
-              {t.companyLinks.map((link: any, i: number) => (
-                <li key={i}>
-                    {link.href.startsWith('#') ? (
-                        <button onClick={() => onOpenLegal(link.href)} className="text-neutral-500 hover:text-[#C1FF72] transition-colors text-sm text-left">
-                            {link.label}
-                        </button>
-                    ) : (
-                        <a href={link.href} className="text-neutral-500 hover:text-[#C1FF72] transition-colors text-sm">{link.label}</a>
-                    )}
-                </li>
-              ))}
+              {t.companyLinks.map((link: any, i: number) => {
+                let onClick = () => onScrollToSection(link.href);
+                if (link.href === '#contact') onClick = onContactClick;
+                else if (link.href === '#privacy' || link.href === '#terms') onClick = () => onOpenLegal(link.href);
+
+                return (
+                    <li key={i}>
+                      <button 
+                        onClick={onClick}
+                        className="text-neutral-500 hover:text-[#C1FF72] transition-colors text-sm text-left"
+                      >
+                        {link.label}
+                      </button>
+                    </li>
+                );
+              })}
             </ul>
           </div>
         </div>
@@ -777,6 +817,10 @@ const App: React.FC = () => {
     setCurrentView('signup');
   };
 
+  const handleScheduleDemo = () => {
+    setCurrentView('schedule-demo');
+  };
+
   const handlePlanSelection = (plan: string, price: string, period: string) => {
     // If it's a "Custom" plan, we might want a different flow (e.g. contact sales), 
     // but for now we route to signup with context or mock payment if needed.
@@ -799,9 +843,26 @@ const App: React.FC = () => {
     setCurrentView('login');
   };
 
+  const handleContact = () => {
+    setCurrentView('contact');
+  };
+
   const handleDashboardRedirect = () => {
     setCurrentView('dashboard');
   }
+
+  const handleScrollToSection = (id: string) => {
+    setCurrentView('landing');
+    setTimeout(() => {
+      const elementId = id.replace('#', '');
+      const element = document.getElementById(elementId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 100);
+  };
 
   const renderView = () => {
     switch (currentView) {
@@ -843,6 +904,20 @@ const App: React.FC = () => {
             selectedPlan={selectedPlan?.name}
           />
         );
+      case 'contact':
+        return (
+          <ContactPage 
+            lang={language}
+            onBack={() => setCurrentView('landing')}
+          />
+        );
+      case 'schedule-demo':
+        return (
+          <ScheduleDemoPage
+            lang={language}
+            onBack={() => setCurrentView('landing')}
+          />
+        );
       default:
         return (
           <>
@@ -854,7 +929,11 @@ const App: React.FC = () => {
               onHomeClick={() => setCurrentView('landing')}
             />
             <main>
-              <Hero lang={language} onSignupClick={handleSignup} />
+              <Hero 
+                lang={language} 
+                onSignupClick={handleSignup} 
+                onScheduleDemoClick={handleScheduleDemo}
+              />
               <WhatIsSection lang={language} />
               <ProblemSection lang={language} />
               <LiveDemo lang={language} />
@@ -868,6 +947,8 @@ const App: React.FC = () => {
               lang={language} 
               onLoginClick={handleLogin}
               onOpenLegal={setLegalModalId}
+              onContactClick={handleContact}
+              onScrollToSection={handleScrollToSection}
             />
             {legalModalId && (
               <LegalModal 
