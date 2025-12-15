@@ -24,7 +24,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
 
   const t = {
     en: {
-      back: "Back to Home",
+      back: "Back",
       welcome: "Welcome",
       subtitle: "Enter your credentials to access your dashboard.",
       emailLabel: "Email Address",
@@ -56,7 +56,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
       tryAgain: "Use a different email"
     },
     tr: {
-      back: "Ana Sayfaya Dön",
+      back: "Geri",
       welcome: "Hoşgeldiniz",
       subtitle: "Panelinize erişmek için bilgilerinizi girin.",
       emailLabel: "E-posta Adresi",
@@ -450,13 +450,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
 
       {/* Header / Back Button */}
       <div className="w-full max-w-7xl mx-auto p-6 relative z-20">
-        <button 
+        <Button 
           onClick={onBack}
-          className="flex items-center text-neutral-400 hover:text-white transition-colors group"
+          className="!px-6 !py-3"
         >
-          <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="w-4 h-4 mr-2" />
           {text.back}
-        </button>
+        </Button>
       </div>
 
       {/* Main Content */}

@@ -14,7 +14,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ lang, onBack }) => {
 
   const t = {
     en: {
-      back: "Back to Home",
+      back: "Back",
       title: "Get in touch",
       subtitle: "Have questions about Pexify? We're here to help.",
       form: {
@@ -40,7 +40,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ lang, onBack }) => {
       }
     },
     tr: {
-      back: "Ana Sayfaya Dön",
+      back: "Geri",
       title: "İletişime Geçin",
       subtitle: "Pexify hakkında sorularınız mı var? Yardımcı olmak için buradayız.",
       form: {
@@ -89,13 +89,13 @@ export const ContactPage: React.FC<ContactPageProps> = ({ lang, onBack }) => {
 
       {/* Header / Back Button */}
       <div className="w-full max-w-7xl mx-auto p-6 relative z-20">
-        <button 
+        <Button 
           onClick={onBack}
-          className="flex items-center text-neutral-400 hover:text-white transition-colors group"
+          className="!px-6 !py-3"
         >
-          <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="w-4 h-4 mr-2" />
           {text.back}
-        </button>
+        </Button>
       </div>
 
       <div className="flex-grow flex items-center justify-center p-6 relative z-10">

@@ -76,13 +76,13 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginCli
 
       {/* Header / Back Button */}
       <div className="w-full max-w-7xl mx-auto p-6 relative z-20">
-        <button 
+        <Button 
           onClick={onBack}
-          className="flex items-center text-neutral-400 hover:text-white transition-colors group"
+          className="!px-6 !py-3"
         >
-          <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="w-4 h-4 mr-2" />
           {text.back}
-        </button>
+        </Button>
       </div>
 
       {/* Main Content */}

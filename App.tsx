@@ -102,7 +102,6 @@ const translations = {
       madeFor: "Made for Global Trade",
       productLinks: [
         { label: "Features", href: "#features" },
-        { label: "Integrations", href: "#workflow" },
         { label: "Pricing", href: "#pricing" },
         { label: "Changelog", href: "#changelog" }
       ],
@@ -203,7 +202,6 @@ const translations = {
       madeFor: "Küresel Ticaret için Üretildi",
       productLinks: [
         { label: "Özellikler", href: "#features" },
-        { label: "Entegrasyonlar", href: "#workflow" },
         { label: "Fiyatlandırma", href: "#pricing" },
         { label: "Sürüm Notları", href: "#changelog" }
       ],
@@ -247,13 +245,14 @@ const NavBar = ({
 
   const scrollToSection = (id: string) => {
     onHomeClick(); 
+    // Increased timeout to 300ms to allow view transition to complete before scrolling
     setTimeout(() => {
       const element = document.getElementById(id);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
         setMobileMenuOpen(false);
       }
-    }, 100); 
+    }, 300); 
   };
 
   const scrollToTop = () => {
@@ -283,8 +282,10 @@ const NavBar = ({
             <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center space-x-8 text-sm font-medium text-neutral-400">
             <button onClick={scrollToTop} className="hover:text-white transition-colors">{t.overview}</button>
             <button onClick={() => scrollToSection('problem')} className="hover:text-white transition-colors">{t.problem}</button>
+            {/* Swapped order: How It Works first, then Features */}
+            <button onClick={() => scrollToSection('live-demo')} className="hover:text-white transition-colors">{t.howItWorks}</button>
             <button onClick={() => scrollToSection('features')} className="hover:text-white transition-colors">{t.features}</button>
-            <button onClick={() => scrollToSection('workflow')} className="hover:text-white transition-colors">{t.howItWorks}</button>
+            
             <button onClick={() => scrollToSection('pricing')} className="hover:text-white transition-colors">{t.pricing}</button>
             </div>
 
@@ -326,8 +327,10 @@ const NavBar = ({
         <div className="absolute top-full left-0 w-full bg-black border-b border-neutral-800 p-6 md:hidden flex flex-col space-y-4 shadow-2xl">
           <button className="text-left text-neutral-400 hover:text-white" onClick={scrollToTop}>{t.overview}</button>
           <button className="text-left text-neutral-400 hover:text-white" onClick={() => scrollToSection('problem')}>{t.problem}</button>
+          {/* Swapped order: How It Works first, then Features */}
+          <button className="text-left text-neutral-400 hover:text-white" onClick={() => scrollToSection('live-demo')}>{t.howItWorks}</button>
           <button className="text-left text-neutral-400 hover:text-white" onClick={() => scrollToSection('features')}>{t.features}</button>
-          <button className="text-left text-neutral-400 hover:text-white" onClick={() => scrollToSection('workflow')}>{t.howItWorks}</button>
+          
           <button className="text-left text-neutral-400 hover:text-white" onClick={() => scrollToSection('pricing')}>{t.pricing}</button>
           <button className="text-left text-white font-medium" onClick={() => { onLoginClick(); setMobileMenuOpen(false); }}>{t.login}</button>
           <Button className="w-full justify-center" onClick={() => { onSignupClick(); setMobileMenuOpen(false); }}>{t.getStarted}</Button>

@@ -114,13 +114,19 @@ const getMockNotifications = (lang: 'en' | 'tr') => {
     return [
       { id: 1, title: "Analiz Tamamlandı", msg: "INV-2024-001.pdf başarıyla doğrulandı.", time: "2 dk önce", type: "success" },
       { id: 2, title: "Risk Tespit Edildi", msg: "PL-2024-003-US.pdf ağırlık uyuşmazlığı içeriyor.", time: "1 sa önce", type: "error" },
-      { id: 3, title: "Sistem Güncellemesi", msg: "Yeni OCR motoru özellikleri mevcut.", time: "1 gün önce", type: "info" }
+      { id: 3, title: "Sistem Güncellemesi", msg: "Yeni OCR motoru özellikleri mevcut.", time: "1 gün önce", type: "info" },
+      { id: 4, title: "Yeni Belge Yüklendi", msg: "BL-DRAFT-V2.pdf işlenmek üzere sıraya alındı.", time: "2 gün önce", type: "info" },
+      { id: 5, title: "Güvenlik Uyarısı", msg: "Hesabınıza farklı bir cihazdan giriş yapıldı.", time: "3 gün önce", type: "error" },
+      { id: 6, title: "Plan Yenilendi", msg: "Büyüme planınız başarıyla yenilendi.", time: "1 hafta önce", type: "success" }
     ];
   }
   return [
     { id: 1, title: "Analysis Complete", msg: "INV-2024-001.pdf verified successfully.", time: "2 min ago", type: "success" },
     { id: 2, title: "Risk Detected", msg: "PL-2024-003-US.pdf has weight mismatches.", time: "1 hr ago", type: "error" },
-    { id: 3, title: "System Update", msg: "New OCR engine features available.", time: "1 day ago", type: "info" }
+    { id: 3, title: "System Update", msg: "New OCR engine features available.", time: "1 day ago", type: "info" },
+    { id: 4, title: "New Document Uploaded", msg: "BL-DRAFT-V2.pdf queued for processing.", time: "2 days ago", type: "info" },
+    { id: 5, title: "Security Alert", msg: "New login detected from a new device.", time: "3 days ago", type: "error" },
+    { id: 6, title: "Plan Renewed", msg: "Your Growth plan has been renewed.", time: "1 week ago", type: "success" }
   ];
 };
 
@@ -634,16 +640,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
           </div>
 
           <div className="flex items-center gap-3 md:gap-6">
-            <div className="relative hidden md:block">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
-              <input 
-                type="text" 
-                placeholder={text.header.search}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-[#0F0F0F] border border-neutral-800 rounded-full py-2 pl-10 pr-4 text-sm text-white focus:border-[#C1FF72] focus:outline-none w-64 transition-all"
-              />
-            </div>
+            {activeTab === 'documents' && (
+              <div className="relative hidden md:block">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
+                <input 
+                  type="text" 
+                  placeholder={text.header.search}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-[#0F0F0F] border border-neutral-800 rounded-full py-2 pl-10 pr-4 text-sm text-white focus:border-[#C1FF72] focus:outline-none w-64 transition-all"
+                />
+              </div>
+            )}
             
             <button 
               onClick={() => setLang(lang === 'en' ? 'tr' : 'en')}
@@ -1978,8 +1986,8 @@ const AllNotificationsModal = ({ lang, text, notifications, onClose, onMarkAllRe
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
-            <div className="bg-[#0F0F0F] border border-neutral-800 rounded-3xl w-full max-w-2xl relative z-10 shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
-                <div className="p-6 border-b border-neutral-800 flex items-center justify-between">
+            <div className="bg-[#0F0F0F] border border-neutral-800 rounded-3xl w-full max-w-5xl h-[80vh] relative z-10 shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col overflow-hidden">
+                <div className="p-6 border-b border-neutral-800 flex items-center justify-between bg-[#0F0F0F] z-20">
                     <h3 className="text-xl font-semibold text-white">{text.modalTitle}</h3>
                     <div className="flex items-center gap-4">
                         {notifications.length > 0 && (
@@ -1992,27 +2000,31 @@ const AllNotificationsModal = ({ lang, text, notifications, onClose, onMarkAllRe
                         </button>
                     </div>
                 </div>
-                <div className="p-6 overflow-y-auto custom-scrollbar">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
                     {notifications.length > 0 ? (
                         <div className="space-y-4">
                             {notifications.map((notif: any) => (
-                                <div key={notif.id} className="p-4 bg-neutral-900/50 border border-neutral-800 rounded-xl hover:border-neutral-700 transition-colors">
+                                <button 
+                                    key={notif.id} 
+                                    className="w-full text-left p-4 bg-neutral-900/50 border border-neutral-800 rounded-xl hover:border-[#C1FF72]/50 hover:bg-neutral-900 transition-all group"
+                                    onClick={() => console.log('Notification clicked:', notif.id)}
+                                >
                                     <div className="flex items-start gap-4">
                                         <div className={`w-3 h-3 mt-1.5 rounded-full shrink-0 ${
-                                            notif.type === 'success' ? 'bg-green-500' :
-                                            notif.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
-                                        }`}></div>
+                                            notif.type === 'success' ? 'bg-green-500 group-hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]' :
+                                            notif.type === 'error' ? 'bg-red-500 group-hover:shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-blue-500 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.5)]'
+                                        } transition-shadow`}></div>
                                         <div>
-                                            <h4 className="text-base font-medium text-white">{notif.title}</h4>
-                                            <p className="text-sm text-neutral-400 mt-1">{notif.msg}</p>
+                                            <h4 className="text-base font-medium text-white group-hover:text-[#C1FF72] transition-colors">{notif.title}</h4>
+                                            <p className="text-sm text-neutral-400 mt-1 group-hover:text-neutral-300">{notif.msg}</p>
                                             <span className="text-xs text-neutral-600 mt-3 block">{notif.time}</span>
                                         </div>
                                     </div>
-                                </div>
+                                </button>
                             ))}
                         </div>
                     ) : (
-                        <div className="py-12 text-center">
+                        <div className="h-full flex flex-col items-center justify-center text-center">
                             <Bell className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
                             <p className="text-neutral-500">{text.empty}</p>
                         </div>

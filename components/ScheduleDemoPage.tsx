@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Clock, User, Building, CheckCircle2, ChevronLeft, ChevronRight, BarChart3, Target, Factory } from 'lucide-react';
 import { Button } from './Button';
@@ -120,7 +121,7 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
       success: {
         title: "You're all set!",
         desc: "We have sent a calendar invitation to your email.",
-        btn: "Back to Home"
+        btn: "Back"
       },
       months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
       weekDays: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
@@ -175,7 +176,7 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
       success: {
         title: "Harika, işlem tamam!",
         desc: "Takvim davetiyesini e-posta adresinize gönderdik.",
-        btn: "Ana Sayfaya Dön"
+        btn: "Geri"
       },
       months: ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"],
       weekDays: ["Pz", "Pt", "Sa", "Ça", "Pe", "Cu", "Ct"],
@@ -591,10 +592,13 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
       </div>
 
       <div className="w-full max-w-7xl mx-auto p-6 relative z-20">
-        <button onClick={onBack} className="flex items-center text-neutral-400 hover:text-white transition-colors group">
-          <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+        <Button 
+          onClick={onBack}
+          className="!px-6 !py-3"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
           {text.back}
-        </button>
+        </Button>
       </div>
 
       <div className="flex-grow flex items-center justify-center p-6 relative z-10">
