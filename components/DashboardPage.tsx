@@ -1817,25 +1817,21 @@ const AnalyticsView = ({ lang, currency }: { lang: 'en' | 'tr', currency: { code
                         ))}
                     </div>
                 </div>
-                <div className="flex flex-col h-64">
-                    <div className="flex items-end justify-between h-48 gap-1.5 px-1">
+                <div className="flex flex-col">
+                    <div className="flex items-end justify-between h-48 gap-1.5">
                         {chartData.data.map((h, i) => (
-                            <div key={i} className="flex-1 relative group cursor-pointer">
-                                <div
-                                    className="w-full bg-neutral-700 rounded-t-lg hover:bg-[#C1FF72] transition-all duration-300 relative"
-                                    style={{
-                                        height: `${Math.max(h, 10)}%`,
-                                        minHeight: '20px'
-                                    }}
-                                >
-                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                                        {Math.round(h * multiplier * 1.5)} {lang === 'tr' ? 'belge' : 'docs'}
-                                    </div>
+                            <div
+                                key={i}
+                                className="flex-1 bg-neutral-700 rounded-t hover:bg-[#C1FF72] transition-all duration-300 relative group cursor-pointer"
+                                style={{ height: `${h}%` }}
+                            >
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-neutral-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                    {Math.round(h * multiplier * 1.5)} {lang === 'tr' ? 'belge' : 'docs'}
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <div className="flex justify-between gap-1.5 mt-4 pt-2 border-t border-neutral-800 px-1">
+                    <div className="flex justify-between gap-1.5 mt-3 pt-3 border-t border-neutral-800">
                         {chartData.labels.map((label, i) => (
                             <div key={i} className="flex-1 text-center">
                                 <span className="text-[10px] text-neutral-400 font-medium">{label}</span>
