@@ -816,12 +816,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
         )}
 
         {activeModal.type === 'view' && activeModal.doc && (
-          <ViewDocModal 
-            doc={activeModal.doc} 
+          <ViewDocModal
+            doc={activeModal.doc}
             lang={lang}
-            text={text.actionModals} 
+            text={text.actionModals}
             statusMap={statusMap[lang]}
-            onClose={() => setActiveModal({ type: null, doc: null })} 
+            onClose={() => setActiveModal({ type: null, doc: null })}
+            onUpdate={(updatedDoc) => {
+              setAllDocs(prevDocs =>
+                prevDocs.map(d => d.id === updatedDoc.id ? updatedDoc : d)
+              );
+            }}
           />
         )}
 
@@ -849,7 +854,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
 
 // ... (other components like ViewDocModal, UploadModal, DashboardHomeView unchanged)
 
-const ViewDocModal = ({ doc, lang, text, statusMap, onClose }: { doc: Doc, lang: 'en' | 'tr', text: any, statusMap: any, onClose: () => void }) => {
+const ViewDocModal = ({ doc, lang, text, statusMap, onClose, onUpdate }: { doc: Doc, lang: 'en' | 'tr', text: any, statusMap: any, onClose: () => void, onUpdate: (updatedDoc: Doc) => void }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedDoc, setEditedDoc] = useState(doc);
   const [isSaving, setIsSaving] = useState(false);
@@ -890,6 +895,8 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose }: { doc: Doc, lang:
         });
 
       if (error) throw error;
+
+      onUpdate(updatedDoc);
     } catch (error) {
       console.error('Error saving document:', error);
     } finally {
