@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Menu, X, Check, ChevronRight, FileCheck, Globe, TrendingUp, AlertTriangle, ShieldCheck, Instagram, Facebook, Twitter } from 'lucide-react';
 import { Button } from './components/Button';
 import { LiveDemo } from './components/LiveDemo';
@@ -809,8 +809,7 @@ const App: React.FC = () => {
   const [legalModalId, setLegalModalId] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<{name: string, price: string, period: string} | null>(null);
 
-  useEffect(() => {
-    // Scroll to top on view change
+  useLayoutEffect(() => {
     window.scrollTo(0, 0);
   }, [currentView]);
 
