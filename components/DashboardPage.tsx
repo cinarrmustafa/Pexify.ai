@@ -1077,30 +1077,30 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose }: { doc: Doc, lang:
               )}
             </div>
           </div>
-          <div className="mt-8 flex justify-end gap-3">
-            {isEditing && (
-              <button
-                onClick={() => {
+          <div className="mt-8 flex justify-end">
+            <button
+              onClick={() => {
+                if (isEditing) {
                   saveToDatabase(editedDoc);
                   setIsEditing(false);
-                }}
-                disabled={isSaving}
-                className="px-6 py-2.5 bg-[#C1FF72] text-black font-semibold rounded-xl hover:bg-[#a8e05a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    {lang === 'tr' ? 'Kaydediliyor...' : 'Saving...'}
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    {lang === 'tr' ? 'Kaydet' : 'Save'}
-                  </>
-                )}
-              </button>
-            )}
-            <Button variant="outline" onClick={onClose}>{text.close}</Button>
+                }
+                onClose();
+              }}
+              disabled={isSaving}
+              className="px-4 py-2 bg-[#C1FF72] text-black font-semibold rounded-xl hover:bg-[#a8e05a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  {lang === 'tr' ? 'Kaydediliyor...' : 'Saving...'}
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  {lang === 'tr' ? 'Kaydet' : 'Save'}
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>
