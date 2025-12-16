@@ -31,6 +31,7 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
   const [customRole, setCustomRole] = useState('');
   const [volume, setVolume] = useState('');
   const [challenge, setChallenge] = useState('');
+  const [customChallenge, setCustomChallenge] = useState('');
   
   // Form States
   const [name, setName] = useState('');
@@ -83,6 +84,7 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
         specifyRole: "Please specify your role",
         volume: "Monthly Export Volume (Docs)",
         challenge: "Primary challenge?",
+        specifyChallenge: "Please specify your challenge",
         details: "Contact Details",
         calendar: "Select Date & Time"
       },
@@ -103,7 +105,7 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
           "150–300 shipments",
           "300+ shipments"
         ],
-        challenges: ["Customs Delays", "Manual Data Entry", "Compliance Risks", "High Costs"]
+        challenges: ["Customs Delays", "Manual Data Entry", "Compliance Risks", "High Costs", "Other"]
       },
       form: {
         title: "Almost there! We just need your details.",
@@ -139,6 +141,7 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
         specifyRole: "Lütfen görevinizi belirtiniz",
         volume: "Aylık İhracat Hacmi (Belge Sayısı)",
         challenge: "En büyük zorluğunuz nedir?",
+        specifyChallenge: "Lütfen zorluğunuzu belirtiniz",
         details: "İletişim Bilgileri",
         calendar: "Tarih ve Saat Seçin"
       },
@@ -159,7 +162,7 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
           "150–300 gönderi",
           "300+ gönderi"
         ],
-        challenges: ["Gümrük Gecikmeleri", "Manuel Veri Girişi", "Uyum Riskleri", "Yüksek Maliyetler"]
+        challenges: ["Gümrük Gecikmeleri", "Manuel Veri Girişi", "Uyum Riskleri", "Yüksek Maliyetler", "Diğer"]
       },
       form: {
         title: "Neredeyse bitti! Bilgilerinize ihtiyacımız var.",
@@ -384,33 +387,67 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
     </div>
   );
 
-  const renderChallengeStep = () => (
-    <div className="w-full">
-      <div className="w-16 h-16 bg-neutral-900 rounded-2xl flex items-center justify-center mb-6 mx-auto border border-neutral-800">
-        <Target className="w-8 h-8 text-[#C1FF72]" />
-      </div>
-      <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">{text.steps.challenge}</h2>
-      <div className="flex flex-col gap-3 max-w-xl mx-auto">
-        {text.options.challenges.map((c) => (
-          <button
-            key={c}
-            onClick={() => { setChallenge(c); goToStep('details'); }}
-            className={`p-4 rounded-xl border text-left transition-all duration-300 group
-              ${challenge === c
-                ? 'bg-[#C1FF72] border-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)]'
-                : 'bg-[#0A0A0A] border-neutral-800 text-neutral-300 hover:border-neutral-600 hover:bg-neutral-900'}`}
-          >
-            <span className="font-medium text-base block">{c}</span>
+  const renderChallengeStep = () => {
+    const otherOptionString = text.options.challenges[text.options.challenges.length - 1];
+    const isOtherSelected = challenge === otherOptionString;
+
+    return (
+      <div className="w-full">
+        <div className="w-16 h-16 bg-neutral-900 rounded-2xl flex items-center justify-center mb-6 mx-auto border border-neutral-800">
+          <Target className="w-8 h-8 text-[#C1FF72]" />
+        </div>
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">{text.steps.challenge}</h2>
+        <div className="flex flex-col gap-3 max-w-xl mx-auto">
+          {text.options.challenges.map((c) => (
+            <button
+              key={c}
+              onClick={() => {
+                setChallenge(c);
+                if (c !== otherOptionString) {
+                  goToStep('details');
+                }
+              }}
+              className={`p-4 rounded-xl border text-left transition-all duration-300 group
+                ${challenge === c
+                  ? 'bg-[#C1FF72] border-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)]'
+                  : 'bg-[#0A0A0A] border-neutral-800 text-neutral-300 hover:border-neutral-600 hover:bg-neutral-900'}`}
+            >
+              <span className="font-medium text-base block">{c}</span>
+            </button>
+          ))}
+        </div>
+
+        {isOtherSelected && (
+           <div className="mt-6 max-w-xl mx-auto">
+              <label className="text-sm font-medium text-neutral-400 mb-2 block">{text.steps.specifyChallenge}</label>
+              <div className="flex gap-3 flex-col">
+                 <input
+                    type="text"
+                    value={customChallenge}
+                    onChange={(e) => setCustomChallenge(e.target.value)}
+                    placeholder={text.steps.specifyChallenge + "..."}
+                    className="w-full h-12 px-4 bg-[#0A0A0A] border border-neutral-800 rounded-xl text-white text-sm focus:border-[#C1FF72] outline-none transition-all"
+                    autoFocus
+                 />
+                 <Button
+                    onClick={() => goToStep('details')}
+                    disabled={!customChallenge.trim()}
+                    className="w-full"
+                 >
+                    {text.next}
+                 </Button>
+              </div>
+           </div>
+        )}
+
+        <div className="mt-8 flex justify-center">
+          <button onClick={() => goBack('volume')} className="text-neutral-500 hover:text-white flex items-center gap-2 text-sm">
+              <ArrowLeft className="w-4 h-4" /> {text.back}
           </button>
-        ))}
+        </div>
       </div>
-      <div className="mt-8 flex justify-center">
-        <button onClick={() => goBack('volume')} className="text-neutral-500 hover:text-white flex items-center gap-2 text-sm">
-            <ArrowLeft className="w-4 h-4" /> {text.back}
-        </button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderDetailsStep = () => (
     <div className="w-full max-w-lg mx-auto">
