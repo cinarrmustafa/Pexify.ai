@@ -975,9 +975,18 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose }: { doc: Doc, lang:
             </div>
           </div>
           <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            <div className="flex justify-between border-b border-neutral-800 pb-2">
+            <div className="flex justify-between items-center border-b border-neutral-800 pb-2">
               <span className="text-neutral-400">{text.labelName}</span>
-              <span className="text-white font-medium text-right break-all">{editedDoc.name}</span>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editedDoc.name}
+                  onChange={(e) => handleFieldChange('name', e.target.value)}
+                  className="bg-neutral-900 text-white border border-neutral-700 rounded px-2 py-1 text-sm flex-1 ml-4"
+                />
+              ) : (
+                <span className="text-white font-medium text-right break-all">{editedDoc.name}</span>
+              )}
             </div>
 
             <div className="flex justify-between items-center border-b border-neutral-800 pb-2">
