@@ -1,15 +1,15 @@
 
 import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  UploadCloud, 
-  History, 
-  Settings, 
-  LogOut, 
-  Bell, 
-  Search, 
-  Plus, 
+import {
+  LayoutDashboard,
+  FileText,
+  UploadCloud,
+  History,
+  Settings,
+  LogOut,
+  Bell,
+  Search,
+  Plus,
   MoreVertical,
   CheckCircle2,
   AlertTriangle,
@@ -48,6 +48,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { Button } from './Button';
+import { supabase } from '../lib/supabase';
 
 interface DashboardPageProps {
   lang: 'en' | 'tr';
@@ -849,8 +850,70 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
 // ... (other components like ViewDocModal, UploadModal, DashboardHomeView unchanged)
 
 const ViewDocModal = ({ doc, lang, text, statusMap, onClose }: { doc: Doc, lang: 'en' | 'tr', text: any, statusMap: any, onClose: () => void }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedDoc, setEditedDoc] = useState(doc);
+  const [isSaving, setIsSaving] = useState(false);
+
   const isImage = doc.fileUrl && (doc.name.toLowerCase().endsWith('.jpg') || doc.name.toLowerCase().endsWith('.png') || doc.name.toLowerCase().endsWith('.jpeg'));
   const isPdf = doc.fileUrl && doc.name.toLowerCase().endsWith('.pdf');
+
+  const documentTypes = [
+    { value: 'Invoice', label: lang === 'tr' ? 'Fatura' : 'Invoice' },
+    { value: 'Packing List', label: lang === 'tr' ? 'Çeki Listesi' : 'Packing List' },
+    { value: 'Bill of Lading', label: lang === 'tr' ? 'Konşimento' : 'Bill of Lading' },
+    { value: 'Certificate', label: lang === 'tr' ? 'Sertifika' : 'Certificate' },
+    { value: 'Weight Note', label: lang === 'tr' ? 'Ağırlık Listesi' : 'Weight Note' },
+    { value: 'Other', label: lang === 'tr' ? 'Diğer' : 'Other' }
+  ];
+
+  const statusOptions = [
+    { value: 'verified', label: lang === 'tr' ? 'DOĞRULANDI' : 'VERIFIED' },
+    { value: 'risk', label: lang === 'tr' ? 'RİSK' : 'RISK' },
+    { value: 'processing', label: lang === 'tr' ? 'İŞLENİYOR' : 'PROCESSING' },
+    { value: 'queued', label: lang === 'tr' ? 'BEKLİYOR' : 'QUEUED' }
+  ];
+
+  const saveToDatabase = async (updatedDoc: any) => {
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('documents')
+        .upsert({
+          id: updatedDoc.id,
+          name: updatedDoc.name,
+          type: updatedDoc.type,
+          date: updatedDoc.date,
+          size: updatedDoc.size,
+          status: updatedDoc.status,
+          tags: updatedDoc.tags,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error saving document:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleFieldChange = (field: string, value: any) => {
+    const updated = { ...editedDoc, [field]: value };
+    setEditedDoc(updated);
+    saveToDatabase(updated);
+  };
+
+  const addTag = () => {
+    const newTag = prompt(lang === 'tr' ? 'Yeni etiket:' : 'New tag:');
+    if (newTag && newTag.trim()) {
+      handleFieldChange('tags', [...editedDoc.tags, newTag.trim()]);
+    }
+  };
+
+  const removeTag = (index: number) => {
+    const newTags = editedDoc.tags.filter((_, i) => i !== index);
+    handleFieldChange('tags', newTags);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -864,14 +927,12 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose }: { doc: Doc, lang:
                 ) : isPdf ? (
                     <iframe src={doc.fileUrl} className="w-full h-full rounded-2xl" title={doc.name}></iframe>
                 ) : (
-                    // Fallback if type is unknown or not supported by simple embed
                     <div className="flex flex-col items-center justify-center p-6 text-center">
                         <FileText className="w-16 h-16 text-neutral-600 mb-4" />
                         <p className="text-neutral-400">{text.noPreview}</p>
                     </div>
                 )
             ) : (
-                // Mock Data Placeholder
                 <div className="w-[210px] h-[297px] bg-white shadow-xl flex flex-col p-6 gap-3 opacity-90 transform group-hover:scale-105 transition-transform duration-500 relative">
                     <div className="h-4 w-1/3 bg-gray-300 rounded mb-6"></div>
                     <div className="space-y-3">
@@ -902,39 +963,112 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose }: { doc: Doc, lang:
         <div className="flex-1 flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-semibold text-white">{text.viewTitle}</h3>
-            <button onClick={onClose} className="text-neutral-500 hover:text-white"><X className="w-5 h-5" /></button>
+            <div className="flex items-center gap-2">
+              {isSaving && <Loader2 className="w-4 h-4 text-[#C1FF72] animate-spin" />}
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className="text-neutral-400 hover:text-[#C1FF72] transition-colors"
+              >
+                <Edit className="w-5 h-5" />
+              </button>
+              <button onClick={onClose} className="text-neutral-500 hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
           </div>
           <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
             <div className="flex justify-between border-b border-neutral-800 pb-2">
               <span className="text-neutral-400">{text.labelName}</span>
-              <span className="text-white font-medium text-right break-all">{doc.name}</span>
+              <span className="text-white font-medium text-right break-all">{editedDoc.name}</span>
             </div>
-            <div className="flex justify-between border-b border-neutral-800 pb-2">
+
+            <div className="flex justify-between items-center border-b border-neutral-800 pb-2">
               <span className="text-neutral-400">{text.labelType}</span>
-              <span className="text-white text-right">{getDocTypeTranslation(doc.type, lang)}</span>
+              {isEditing ? (
+                <select
+                  value={editedDoc.type}
+                  onChange={(e) => handleFieldChange('type', e.target.value)}
+                  className="bg-neutral-900 text-white border border-neutral-700 rounded px-2 py-1 text-sm"
+                >
+                  {documentTypes.map(type => (
+                    <option key={type.value} value={type.value}>{type.label}</option>
+                  ))}
+                </select>
+              ) : (
+                <span className="text-white text-right">{getDocTypeTranslation(editedDoc.type, lang)}</span>
+              )}
             </div>
-            <div className="flex justify-between border-b border-neutral-800 pb-2">
+
+            <div className="flex justify-between items-center border-b border-neutral-800 pb-2">
               <span className="text-neutral-400">{text.labelDate}</span>
-              <span className="text-white text-right">{doc.date}</span>
+              {isEditing ? (
+                <input
+                  type="date"
+                  value={editedDoc.date}
+                  onChange={(e) => handleFieldChange('date', e.target.value)}
+                  className="bg-neutral-900 text-white border border-neutral-700 rounded px-2 py-1 text-sm"
+                />
+              ) : (
+                <span className="text-white text-right">{editedDoc.date}</span>
+              )}
             </div>
+
             <div className="flex justify-between border-b border-neutral-800 pb-2">
               <span className="text-neutral-400">{text.labelSize}</span>
-              <span className="text-white font-mono text-right">{doc.size}</span>
+              <span className="text-white font-mono text-right">{editedDoc.size}</span>
             </div>
-            <div className="flex justify-between border-b border-neutral-800 pb-2">
+
+            <div className="flex justify-between items-center border-b border-neutral-800 pb-2">
               <span className="text-neutral-400">{text.labelStatus}</span>
-              <span className="uppercase text-xs font-bold text-[#C1FF72] text-right">{statusMap?.[doc.status] || doc.status}</span>
+              {isEditing ? (
+                <select
+                  value={editedDoc.status}
+                  onChange={(e) => handleFieldChange('status', e.target.value)}
+                  className="bg-neutral-900 text-white border border-neutral-700 rounded px-2 py-1 text-sm uppercase font-bold"
+                >
+                  {statusOptions.map(status => (
+                    <option key={status.value} value={status.value}>{status.label}</option>
+                  ))}
+                </select>
+              ) : (
+                <span className="uppercase text-xs font-bold text-[#C1FF72] text-right">{statusMap?.[editedDoc.status] || editedDoc.status}</span>
+              )}
             </div>
-            {doc.tags.length > 0 && (
-              <div>
-                <span className="text-neutral-400 block mb-2">{text.labelTags}</span>
-                <div className="flex flex-wrap gap-2 justify-end">
-                    {doc.tags.map((tag, i) => (
-                        <span key={i} className="px-2 py-1 bg-neutral-800 text-white text-xs rounded border border-neutral-700">{tag}</span>
-                    ))}
-                </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-neutral-400">{text.labelTags}</span>
+                {isEditing && (
+                  <button
+                    onClick={addTag}
+                    className="text-[#C1FF72] hover:text-[#a8e05a] text-xs flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" />
+                    {lang === 'tr' ? 'Ekle' : 'Add'}
+                  </button>
+                )}
               </div>
-            )}
+              {editedDoc.tags.length > 0 ? (
+                <div className="flex flex-wrap gap-2 justify-end">
+                  {editedDoc.tags.map((tag, i) => (
+                    <span
+                      key={i}
+                      className="px-2 py-1 bg-neutral-800 text-white text-xs rounded border border-neutral-700 flex items-center gap-1"
+                    >
+                      {tag}
+                      {isEditing && (
+                        <button
+                          onClick={() => removeTag(i)}
+                          className="text-neutral-400 hover:text-red-500"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-neutral-600 text-xs text-right block">{lang === 'tr' ? 'Etiket yok' : 'No tags'}</span>
+              )}
+            </div>
           </div>
           <div className="mt-8 flex justify-end">
             <Button variant="outline" onClick={onClose}>{text.close}</Button>
