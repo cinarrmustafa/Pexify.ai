@@ -989,14 +989,22 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose, onUpdate }: { doc: 
     }
   };
 
+  const predefinedTags = ['Urgent', 'Important', 'Reviewed', 'Approved', 'Priority', 'Pending', 'Draft', 'Final'];
+
   const handleFieldChange = (field: string, value: any) => {
     const updated = { ...editedDoc, [field]: value };
     setEditedDoc(updated);
   };
 
-  const addTag = () => {
+  const addPredefinedTag = (tag: string) => {
+    if (!editedDoc.tags.includes(tag)) {
+      handleFieldChange('tags', [...editedDoc.tags, tag]);
+    }
+  };
+
+  const addCustomTag = () => {
     const newTag = prompt(lang === 'tr' ? 'Yeni etiket:' : 'New tag:');
-    if (newTag && newTag.trim()) {
+    if (newTag && newTag.trim() && !editedDoc.tags.includes(newTag.trim())) {
       handleFieldChange('tags', [...editedDoc.tags, newTag.trim()]);
     }
   };
@@ -1133,18 +1141,40 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose, onUpdate }: { doc: 
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-neutral-400">{text.labelTags}</span>
                 {isEditing && (
                   <button
-                    onClick={addTag}
+                    onClick={addCustomTag}
                     className="text-[#C1FF72] hover:text-[#a8e05a] text-xs flex items-center gap-1"
                   >
                     <Plus className="w-3 h-3" />
-                    {lang === 'tr' ? 'Ekle' : 'Add'}
+                    {lang === 'tr' ? 'Özel' : 'Custom'}
                   </button>
                 )}
               </div>
+
+              {isEditing && (
+                <div className="mb-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {predefinedTags.map((tag) => (
+                      <button
+                        key={tag}
+                        onClick={() => addPredefinedTag(tag)}
+                        disabled={editedDoc.tags.includes(tag)}
+                        className={`px-2 py-1 text-xs rounded border transition-colors ${
+                          editedDoc.tags.includes(tag)
+                            ? 'bg-neutral-800 border-neutral-700 text-neutral-600 cursor-not-allowed'
+                            : 'bg-neutral-900 border-neutral-700 text-[#C1FF72] hover:bg-neutral-800 hover:border-[#C1FF72]'
+                        }`}
+                      >
+                        {translateTag(tag, lang)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {editedDoc.tags.length > 0 ? (
                 <div className="flex flex-wrap gap-2 justify-end">
                   {editedDoc.tags.map((tag, i) => (
@@ -2465,6 +2495,21 @@ const RenameDocModal = ({ doc, text, onClose, onSave }: any) => {
 
 const TagDocModal = ({ doc, lang, text, onClose, onAdd }: any) => {
     const [tag, setTag] = useState('');
+    const predefinedTags = ['Urgent', 'Important', 'Reviewed', 'Approved', 'Priority', 'Pending', 'Draft', 'Final'];
+
+    const handlePredefinedTagClick = (selectedTag: string) => {
+        if (!doc.tags.includes(selectedTag)) {
+            onAdd(doc.id, selectedTag);
+        }
+    };
+
+    const handleCustomTagAdd = () => {
+        if (tag.trim() && !doc.tags.includes(tag.trim())) {
+            onAdd(doc.id, tag.trim());
+            setTag('');
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
@@ -2474,24 +2519,53 @@ const TagDocModal = ({ doc, lang, text, onClose, onAdd }: any) => {
                     <button onClick={onClose}><X className="w-5 h-5 text-neutral-500 hover:text-white" /></button>
                 </div>
                 <div className="space-y-4">
-                    <div className="flex flex-wrap gap-2 mb-2">
-                        {doc.tags.map((t: string, i: number) => (
-                            <span key={i} className="px-2 py-1 bg-neutral-800 text-white text-xs rounded border border-neutral-700">{translateTag(t, lang)}</span>
-                        ))}
-                    </div>
                     <div>
-                        <label className="text-xs text-neutral-500 block mb-1.5">{text.tagName}</label>
+                        <label className="text-xs text-neutral-500 block mb-2">{lang === 'tr' ? 'Mevcut Etiketler' : 'Current Tags'}</label>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                            {doc.tags.length > 0 ? (
+                                doc.tags.map((t: string, i: number) => (
+                                    <span key={i} className="px-2 py-1 bg-neutral-800 text-white text-xs rounded border border-neutral-700">{translateTag(t, lang)}</span>
+                                ))
+                            ) : (
+                                <span className="text-neutral-600 text-xs">{lang === 'tr' ? 'Henüz etiket eklenmemiş' : 'No tags added yet'}</span>
+                            )}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="text-xs text-neutral-500 block mb-2">{lang === 'tr' ? 'Hazır Etiketler' : 'Quick Tags'}</label>
+                        <div className="flex flex-wrap gap-1.5">
+                            {predefinedTags.map((predefTag) => (
+                                <button
+                                    key={predefTag}
+                                    onClick={() => handlePredefinedTagClick(predefTag)}
+                                    disabled={doc.tags.includes(predefTag)}
+                                    className={`px-2 py-1 text-xs rounded border transition-colors ${
+                                        doc.tags.includes(predefTag)
+                                            ? 'bg-neutral-800 border-neutral-700 text-neutral-600 cursor-not-allowed'
+                                            : 'bg-neutral-900 border-neutral-700 text-[#C1FF72] hover:bg-neutral-800 hover:border-[#C1FF72]'
+                                    }`}
+                                >
+                                    {translateTag(predefTag, lang)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="text-xs text-neutral-500 block mb-1.5">{lang === 'tr' ? 'Özel Etiket' : 'Custom Tag'}</label>
                         <input
                             type="text"
                             value={tag}
                             onChange={(e) => setTag(e.target.value)}
-                            placeholder={lang === 'tr' ? 'Acil, İncelendi, vb.' : 'Urgent, Reviewed, etc.'}
+                            onKeyDown={(e) => e.key === 'Enter' && handleCustomTagAdd()}
+                            placeholder={lang === 'tr' ? 'Özel etiket yazın...' : 'Type custom tag...'}
                             className="w-full bg-[#0F0F0F] border border-neutral-700 rounded p-2 text-sm text-white focus:border-[#C1FF72] outline-none"
                         />
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
                         <Button variant="outline" onClick={onClose} className="!h-9 !py-0 !px-4 text-xs">{text.cancel}</Button>
-                        <Button onClick={() => onAdd(doc.id, tag)} className="!h-9 !py-0 !px-4 text-xs">{text.add}</Button>
+                        <Button onClick={handleCustomTagAdd} disabled={!tag.trim()} className="!h-9 !py-0 !px-4 text-xs">{text.add}</Button>
                     </div>
                 </div>
             </div>
