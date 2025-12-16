@@ -1450,9 +1450,9 @@ const DashboardHomeView = ({
   const menuRef = useRef<HTMLDivElement>(null);
   
   const queuedDocs = docs.filter(doc => doc.status === 'queued');
-  
-  // Filter out queued docs from the Recent list so they don't appear duplicate in a weird way
-  const recentDocs = docs.filter(d => d.status !== 'queued').slice(0, 5); 
+
+  // Show all docs including queued in Recent list
+  const recentDocs = docs.slice(0, 5); 
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -1512,88 +1512,30 @@ const DashboardHomeView = ({
           />
 
           {/* Upload / Staging Area */}
-          {queuedDocs.length > 0 ? (
-            <div className="bg-[#0A0A0A] border border-[#C1FF72]/30 rounded-3xl overflow-hidden shadow-[0_0_30px_rgba(193,255,114,0.05)]">
-              <div className="p-6 border-b border-neutral-800 flex items-center justify-between bg-[#C1FF72]/5">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded bg-[#C1FF72] flex items-center justify-center text-black">
-                    <Layers className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-white">{text.upload.readyToAnalyze}</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 text-xs font-medium border border-neutral-700">
-                    {queuedDocs.length}
-                  </span>
+          <div
+            className={`bg-[#0A0A0A] border-2 border-dashed ${isUploading ? 'border-[#C1FF72] bg-[#C1FF72]/5' : 'border-neutral-800 hover:border-neutral-700'} rounded-3xl p-10 text-center transition-all duration-300 relative group cursor-pointer`}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onClick={triggerFileSelect}
+          >
+            {isUploading ? (
+              <div className="py-12 flex flex-col items-center animate-pulse">
+                  <UploadCloud className="w-16 h-16 text-[#C1FF72] mb-6" />
+                  <h3 className="text-xl font-medium text-white mb-2">{text.uploadStatus.adding}</h3>
+              </div>
+            ) : (
+              <>
+                <div className="w-20 h-20 bg-neutral-900 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                  <UploadCloud className="w-8 h-8 text-[#C1FF72]" />
                 </div>
-                <button 
-                  onClick={triggerFileSelect} 
-                  className="text-sm text-neutral-400 hover:text-white flex items-center gap-2 hover:bg-neutral-800 px-3 py-1.5 rounded-lg transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  {text.upload.addMore}
-                </button>
-              </div>
-              
-              <div className="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-96 overflow-y-auto custom-scrollbar">
-                {queuedDocs.map(doc => (
-                  <div key={doc.id} className="relative group bg-neutral-900/50 rounded-xl border border-neutral-800/50 hover:border-[#C1FF72]/30 transition-all p-4 flex flex-col items-center text-center aspect-[3/4]">
-                     <button 
-                        onClick={() => onDelete(doc.id)}
-                        className="absolute top-2 right-2 text-neutral-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-neutral-900 rounded-full shadow-sm z-10"
-                     >
-                        <X className="w-3 h-3" />
-                     </button>
-                     <div className="flex-1 w-full flex items-center justify-center bg-neutral-900 rounded-lg mb-3 border border-neutral-800 relative overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                        {/* Simulate preview lines */}
-                        <div className="absolute inset-4 bg-neutral-800/50 rounded flex flex-col gap-2 p-2 opacity-50">
-                          <div className="h-1.5 w-3/4 bg-neutral-700 rounded"></div>
-                          <div className="h-1.5 w-full bg-neutral-700 rounded"></div>
-                          <div className="h-1.5 w-5/6 bg-neutral-700 rounded"></div>
-                          <div className="h-1.5 w-full bg-neutral-700 rounded mt-2"></div>
-                          <div className="h-1.5 w-1/2 bg-neutral-700 rounded"></div>
-                        </div>
-                        <FileText className="w-8 h-8 text-neutral-500 relative z-10 group-hover:text-[#C1FF72] transition-colors" />
-                     </div>
-                     <p className="text-sm text-white font-medium truncate w-full px-2" title={doc.name}>{doc.name}</p>
-                     <p className="text-xs text-neutral-500 mt-1">{doc.size}</p>
-                     <span className="mt-2 px-2 py-0.5 rounded text-[10px] font-medium bg-gray-500/10 text-gray-400 border border-gray-500/20 uppercase tracking-wider">
-                       {text.recent.status.queued}
-                     </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="p-4 bg-neutral-900/30 border-t border-neutral-800 flex justify-end">
-                <Button onClick={onAnalyze} className="flex items-center gap-2 shadow-[0_0_20px_rgba(193,255,114,0.2)]">
-                  {text.upload.startAnalysis}
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div 
-              className={`bg-[#0A0A0A] border-2 border-dashed ${isUploading ? 'border-[#C1FF72] bg-[#C1FF72]/5' : 'border-neutral-800 hover:border-neutral-700'} rounded-3xl p-10 text-center transition-all duration-300 relative group cursor-pointer`}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onClick={triggerFileSelect}
-            >
-              {isUploading ? (
-                <div className="py-12 flex flex-col items-center animate-pulse">
-                    <UploadCloud className="w-16 h-16 text-[#C1FF72] mb-6" />
-                    <h3 className="text-xl font-medium text-white mb-2">{text.uploadStatus.adding}</h3>
-                </div>
-              ) : (
-                <>
-                  <div className="w-20 h-20 bg-neutral-900 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
-                    <UploadCloud className="w-8 h-8 text-[#C1FF72]" />
-                  </div>
-                  <h3 className="text-2xl font-semibold text-white mb-2">{text.upload.title}</h3>
-                  <p className="text-neutral-400 mb-8">
-                    {text.upload.dragDrop} <span className="text-[#C1FF72] border-b border-[#C1FF72] pb-0.5">{text.upload.browse}</span>
-                  </p>
-                  <p className="text-xs text-neutral-600 uppercase tracking-widest">{text.upload.formats}</p>
-                </>
-              )}
-            </div>
-          )}
+                <h3 className="text-2xl font-semibold text-white mb-2">{text.upload.title}</h3>
+                <p className="text-neutral-400 mb-8">
+                  {text.upload.dragDrop} <span className="text-[#C1FF72] border-b border-[#C1FF72] pb-0.5">{text.upload.browse}</span>
+                </p>
+                <p className="text-xs text-neutral-600 uppercase tracking-widest">{text.upload.formats}</p>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="bg-[#0A0A0A] border border-neutral-900 rounded-2xl overflow-hidden min-h-[400px]">
