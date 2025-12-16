@@ -1747,7 +1747,7 @@ const AnalyticsView = ({ lang }: { lang: 'en' | 'tr' }) => {
                     <span className="text-neutral-400 text-sm">{t.cards.timeSaved}</span>
                     <Clock className="w-5 h-5 text-[#C1FF72]" />
                 </div>
-                <div className="text-3xl font-bold text-white">{42 * multiplier} hrs</div>
+                <div className="text-3xl font-bold text-white">{42 * multiplier} {lang === 'tr' ? 'saat' : 'hrs'}</div>
                 <div className="text-xs text-green-500 mt-2">+15% {t.vsPrevious}</div>
             </div>
         </div>
