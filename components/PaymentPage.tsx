@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Check, CreditCard, Lock, ShieldCheck } from 'lucide-react';
 import { Button } from './Button';
 
@@ -14,6 +14,10 @@ interface PaymentPageProps {
 
 export const PaymentPage: React.FC<PaymentPageProps> = ({ lang, plan, price, period, onBack, onContinue }) => {
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const t = {
     en: {

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Mail, Lock, Loader2, Eye, EyeOff, CheckCircle, KeyRound, Hash } from 'lucide-react';
 import { Button } from './Button';
 
@@ -15,6 +15,10 @@ type LoginView = 'login' | 'email' | 'code' | 'password' | 'success';
 export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClick, onLoginSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   // State Management
   const [view, setView] = useState<LoginView>('login');

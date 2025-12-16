@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Mail, MapPin, Phone, Send, Loader2, CheckCircle, Linkedin, Twitter, Instagram } from 'lucide-react';
 import { Button } from './Button';
 
@@ -11,6 +11,10 @@ interface ContactPageProps {
 export const ContactPage: React.FC<ContactPageProps> = ({ lang, onBack }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const t = {
     en: {

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Mail, Lock, User, Building, Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { Button } from './Button';
 
@@ -14,6 +14,10 @@ interface SignUpPageProps {
 export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginClick, onSignupSuccess, selectedPlan }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const t = {
     en: {

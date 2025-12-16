@@ -11,6 +11,10 @@ interface ScheduleDemoPageProps {
 type Step = 'companyType' | 'role' | 'volume' | 'challenge' | 'details' | 'calendar' | 'success';
 
 export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack }) => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Wizard State
   const [currentStep, setCurrentStep] = useState<Step>('companyType');
   const [direction, setDirection] = useState(1); // For animation direction
