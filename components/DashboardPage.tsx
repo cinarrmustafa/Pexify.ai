@@ -228,7 +228,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
         logout: "Log Out"
       },
       header: {
-        welcome: "Global Textiles",
+        companyName: "Global Textiles",
         search: "Search documents...",
         uploadBtn: "Upload New"
       },
@@ -343,7 +343,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
         logout: "Çıkış Yap"
       },
       header: {
-        welcome: "Global Tekstil",
+        companyName: "Global Textiles",
         search: "Belge ara...",
         uploadBtn: "Yeni Yükle"
       },
@@ -724,11 +724,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
         {/* Top Header */}
         <header className="h-20 border-b border-neutral-900 bg-black/50 backdrop-blur-sm flex items-center justify-between pl-2 pr-4 md:px-8 z-20">
           <h1 className="text-xl font-medium text-white hidden md:block">
-            {activeTab === 'documents' ? text.nav.documents : 
+            {activeTab === 'documents' ? text.nav.documents :
              activeTab === 'analytics' ? text.nav.analytics :
              activeTab === 'settings' ? text.nav.settings :
              activeTab === 'upgrade' ? text.plan.upgrade :
-             text.header.welcome}
+             text.header.companyName}
           </h1>
           <div className="md:hidden pl-2">
              <span className="text-2xl font-bold tracking-tight">
@@ -2234,7 +2234,7 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
                 </div>
                 <div className="space-y-2">
                     <label className="text-xs text-neutral-500 uppercase">{t.labels.company}</label>
-                    <input type="text" defaultValue="Global Tekstil A.Ş." className="w-full bg-[#0F0F0F] border border-neutral-800 rounded-lg px-4 py-2 text-sm text-white focus:border-[#C1FF72] outline-none" />
+                    <input type="text" defaultValue="Global Textiles" className="w-full bg-[#0F0F0F] border border-neutral-800 rounded-lg px-4 py-2 text-sm text-white focus:border-[#C1FF72] outline-none" />
                 </div>
             </div>
         </div>
