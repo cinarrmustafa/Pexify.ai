@@ -164,21 +164,21 @@ const translateTag = (tag: string, lang: 'en' | 'tr') => {
 const getMockNotifications = (lang: 'en' | 'tr') => {
   if (lang === 'tr') {
     return [
-      { id: 1, title: "Analiz Tamamlandı", msg: "INV-2024-001.pdf başarıyla doğrulandı.", time: "2 dk önce", type: "success" },
-      { id: 2, title: "Risk Tespit Edildi", msg: "PL-2024-003-US.pdf ağırlık uyuşmazlığı içeriyor.", time: "1 sa önce", type: "error" },
-      { id: 3, title: "Sistem Güncellemesi", msg: "Yeni OCR motoru özellikleri mevcut.", time: "1 gün önce", type: "info" },
-      { id: 4, title: "Yeni Belge Yüklendi", msg: "BL-DRAFT-V2.pdf işlenmek üzere sıraya alındı.", time: "2 gün önce", type: "info" },
-      { id: 5, title: "Güvenlik Uyarısı", msg: "Hesabınıza farklı bir cihazdan giriş yapıldı.", time: "3 gün önce", type: "error" },
-      { id: 6, title: "Plan Yenilendi", msg: "Büyüme planınız başarıyla yenilendi.", time: "1 hafta önce", type: "success" }
+      { id: 1, title: "Analiz Tamamlandı", msg: "INV-2024-001.pdf başarıyla doğrulandı.", time: "2 dk önce", type: "success", isRead: false, dismissing: false },
+      { id: 2, title: "Risk Tespit Edildi", msg: "PL-2024-003-US.pdf ağırlık uyuşmazlığı içeriyor.", time: "1 sa önce", type: "error", isRead: false, dismissing: false },
+      { id: 3, title: "Sistem Güncellemesi", msg: "Yeni OCR motoru özellikleri mevcut.", time: "1 gün önce", type: "info", isRead: false, dismissing: false },
+      { id: 4, title: "Yeni Belge Yüklendi", msg: "BL-DRAFT-V2.pdf işlenmek üzere sıraya alındı.", time: "2 gün önce", type: "info", isRead: false, dismissing: false },
+      { id: 5, title: "Güvenlik Uyarısı", msg: "Hesabınıza farklı bir cihazdan giriş yapıldı.", time: "3 gün önce", type: "error", isRead: false, dismissing: false },
+      { id: 6, title: "Plan Yenilendi", msg: "Büyüme planınız başarıyla yenilendi.", time: "1 hafta önce", type: "success", isRead: false, dismissing: false }
     ];
   }
   return [
-    { id: 1, title: "Analysis Complete", msg: "INV-2024-001.pdf verified successfully.", time: "2 min ago", type: "success" },
-    { id: 2, title: "Risk Detected", msg: "PL-2024-003-US.pdf has weight mismatches.", time: "1 hr ago", type: "error" },
-    { id: 3, title: "System Update", msg: "New OCR engine features available.", time: "1 day ago", type: "info" },
-    { id: 4, title: "New Document Uploaded", msg: "BL-DRAFT-V2.pdf queued for processing.", time: "2 days ago", type: "info" },
-    { id: 5, title: "Security Alert", msg: "New login detected from a new device.", time: "3 days ago", type: "error" },
-    { id: 6, title: "Plan Renewed", msg: "Your Growth plan has been renewed.", time: "1 week ago", type: "success" }
+    { id: 1, title: "Analysis Complete", msg: "INV-2024-001.pdf verified successfully.", time: "2 min ago", type: "success", isRead: false, dismissing: false },
+    { id: 2, title: "Risk Detected", msg: "PL-2024-003-US.pdf has weight mismatches.", time: "1 hr ago", type: "error", isRead: false, dismissing: false },
+    { id: 3, title: "System Update", msg: "New OCR engine features available.", time: "1 day ago", type: "info", isRead: false, dismissing: false },
+    { id: 4, title: "New Document Uploaded", msg: "BL-DRAFT-V2.pdf queued for processing.", time: "2 days ago", type: "info", isRead: false, dismissing: false },
+    { id: 5, title: "Security Alert", msg: "New login detected from a new device.", time: "3 days ago", type: "error", isRead: false, dismissing: false },
+    { id: 6, title: "Plan Renewed", msg: "Your Growth plan has been renewed.", time: "1 week ago", type: "success", isRead: false, dismissing: false }
   ];
 };
 
@@ -197,7 +197,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
   const [searchQuery, setSearchQuery] = useState('');
   const [userPlan, setUserPlan] = useState<PlanType>('Growth');
   const notificationRef = useRef<HTMLDivElement>(null);
-  
+  const notificationTimeouts = useRef<Map<number, NodeJS.Timeout>>(new Map());
+
   // Lifted Notification State
   const [notificationSettings, setNotificationSettings] = useState({
     errorAlerts: true,
@@ -581,7 +582,46 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
     }));
   };
 
+  const handleToggleNotificationRead = (notifId: number, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    setNotifications(prevNotifications => {
+      return prevNotifications.map(notif => {
+        if (notif.id === notifId) {
+          const newIsRead = !notif.isRead;
+
+          if (newIsRead) {
+            const existingTimeout = notificationTimeouts.current.get(notifId);
+            if (existingTimeout) {
+              clearTimeout(existingTimeout);
+            }
+
+            const timeout = setTimeout(() => {
+              setNotifications(prev => prev.filter(n => n.id !== notifId));
+              notificationTimeouts.current.delete(notifId);
+            }, 1500);
+
+            notificationTimeouts.current.set(notifId, timeout);
+            return { ...notif, isRead: true, dismissing: true };
+          } else {
+            const existingTimeout = notificationTimeouts.current.get(notifId);
+            if (existingTimeout) {
+              clearTimeout(existingTimeout);
+              notificationTimeouts.current.delete(notifId);
+            }
+            return { ...notif, isRead: false, dismissing: false };
+          }
+        }
+        return notif;
+      });
+    });
+  };
+
   const handleMarkAllRead = () => {
+    notificationTimeouts.current.forEach(timeout => clearTimeout(timeout));
+    notificationTimeouts.current.clear();
     setNotifications([]);
   };
 
@@ -778,17 +818,34 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
                     {notifications.length > 0 ? (
                       <div className="divide-y divide-neutral-800">
                         {notifications.map((notif) => (
-                          <div key={notif.id} className="p-4 hover:bg-neutral-900/50 transition-colors">
+                          <div
+                            key={notif.id}
+                            className={`p-4 hover:bg-neutral-900/50 transition-all duration-300 ${
+                              notif.dismissing ? 'opacity-50' : 'opacity-100'
+                            }`}
+                          >
                             <div className="flex items-start gap-3">
                               <div className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${
                                 notif.type === 'success' ? 'bg-green-500' :
                                 notif.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
                               }`}></div>
-                              <div>
+                              <div className="flex-1">
                                 <h4 className="text-sm font-medium text-white">{notif.title}</h4>
                                 <p className="text-xs text-neutral-400 mt-0.5">{notif.msg}</p>
                                 <span className="text-[10px] text-neutral-600 mt-2 block">{notif.time}</span>
                               </div>
+                              <button
+                                onClick={(e) => handleToggleNotificationRead(notif.id, e)}
+                                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                                  notif.isRead
+                                    ? 'border-[#C1FF72] bg-[#C1FF72]'
+                                    : 'border-neutral-600 hover:border-neutral-400'
+                                }`}
+                              >
+                                {notif.isRead && (
+                                  <CheckCircle2 className="w-3 h-3 text-black" />
+                                )}
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -896,6 +953,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
             notifications={notifications}
             onClose={() => setIsAllNotificationsModalOpen(false)}
             onMarkAllRead={handleMarkAllRead}
+            onToggleRead={handleToggleNotificationRead}
           />
         )}
 
@@ -2406,7 +2464,7 @@ const UpgradeView = ({ lang, text, currentPlanId, onPlanSelect }: { lang: 'en' |
   );
 };
 
-const AllNotificationsModal = ({ lang, text, notifications, onClose, onMarkAllRead }: any) => {
+const AllNotificationsModal = ({ lang, text, notifications, onClose, onMarkAllRead, onToggleRead }: any) => {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
@@ -2428,23 +2486,36 @@ const AllNotificationsModal = ({ lang, text, notifications, onClose, onMarkAllRe
                     {notifications.length > 0 ? (
                         <div className="space-y-4">
                             {notifications.map((notif: any) => (
-                                <button 
-                                    key={notif.id} 
-                                    className="w-full text-left p-4 bg-neutral-900/50 border border-neutral-800 rounded-xl hover:border-[#C1FF72]/50 hover:bg-neutral-900 transition-all group"
-                                    onClick={() => console.log('Notification clicked:', notif.id)}
+                                <div
+                                    key={notif.id}
+                                    className={`w-full text-left p-4 bg-neutral-900/50 border border-neutral-800 rounded-xl hover:border-[#C1FF72]/50 hover:bg-neutral-900 transition-all group ${
+                                      notif.dismissing ? 'opacity-50' : 'opacity-100'
+                                    }`}
                                 >
                                     <div className="flex items-start gap-4">
                                         <div className={`w-3 h-3 mt-1.5 rounded-full shrink-0 ${
                                             notif.type === 'success' ? 'bg-green-500 group-hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]' :
                                             notif.type === 'error' ? 'bg-red-500 group-hover:shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-blue-500 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.5)]'
                                         } transition-shadow`}></div>
-                                        <div>
+                                        <div className="flex-1">
                                             <h4 className="text-base font-medium text-white group-hover:text-[#C1FF72] transition-colors">{notif.title}</h4>
                                             <p className="text-sm text-neutral-400 mt-1 group-hover:text-neutral-300">{notif.msg}</p>
                                             <span className="text-xs text-neutral-600 mt-3 block">{notif.time}</span>
                                         </div>
+                                        <button
+                                          onClick={(e) => onToggleRead(notif.id, e)}
+                                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                                            notif.isRead
+                                              ? 'border-[#C1FF72] bg-[#C1FF72]'
+                                              : 'border-neutral-600 hover:border-neutral-400'
+                                          }`}
+                                        >
+                                          {notif.isRead && (
+                                            <CheckCircle2 className="w-4 h-4 text-black" />
+                                          )}
+                                        </button>
                                     </div>
-                                </button>
+                                </div>
                             ))}
                         </div>
                     ) : (
