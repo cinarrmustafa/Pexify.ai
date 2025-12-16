@@ -153,6 +153,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
   const [selectedPlanForDetails, setSelectedPlanForDetails] = useState<PlanType | null>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const notificationTimeouts = useRef<Record<number, NodeJS.Timeout>>({});
+  const contentScrollRef = useRef<HTMLDivElement>(null);
 
   // Lifted Notification State
   const [notificationSettings, setNotificationSettings] = useState({
@@ -179,7 +180,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
 
   // Scroll to top when switching tabs
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (contentScrollRef.current) {
+      contentScrollRef.current.scrollTop = 0;
+    }
   }, [activeTab]);
 
   // Load documents from database on mount
@@ -848,7 +851,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
         </header>
 
         {/* Content Render Logic */}
-        <div className="flex-1 overflow-y-auto z-10 custom-scrollbar bg-black relative">
+        <div ref={contentScrollRef} className="flex-1 overflow-y-auto z-10 custom-scrollbar bg-black relative">
            {/* Background Ambience */}
             <div className="absolute inset-0 z-0 pointer-events-none sticky top-0">
                <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#C1FF72] rounded-full mix-blend-multiply filter blur-[150px] opacity-[0.03]"></div>
