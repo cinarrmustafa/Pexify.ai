@@ -1841,17 +1841,17 @@ const StatCard = ({ label, value, change, isPositive = true, icon: Icon }: any) 
 
 const StatusBadge = ({ status, textMap }: any) => {
   const styles = {
-    verified: "bg-green-500/10 text-green-500 border-green-500/20",
-    risk: "bg-red-500/10 text-red-500 border-red-500/20",
-    processing: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-    queued: "bg-gray-500/10 text-gray-400 border-gray-500/20"
+    verified: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    risk: "bg-red-500/20 text-red-400 border-red-500/30",
+    processing: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    queued: "bg-blue-500/20 text-blue-400 border-blue-500/30"
   };
-  
+
   const icons = {
     verified: CheckCircle2,
     risk: AlertTriangle,
     processing: Clock,
-    queued: Layers
+    queued: Clock
   };
 
   const Icon = icons[status as keyof typeof icons] || FileText;
