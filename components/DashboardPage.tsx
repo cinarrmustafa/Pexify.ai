@@ -1,52 +1,6 @@
 
 import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
-import {
-  LayoutDashboard,
-  FileText,
-  UploadCloud,
-  History,
-  Settings,
-  LogOut,
-  Bell,
-  Search,
-  Plus,
-  MoreVertical,
-  CheckCircle2,
-  AlertTriangle,
-  Clock,
-  FileBarChart,
-  Filter,
-  Download,
-  Trash2,
-  Eye,
-  Globe,
-  BarChart3,
-  PieChart,
-  TrendingUp,
-  Map,
-  Calendar,
-  User,
-  CreditCard,
-  Lock,
-  Mail,
-  Save,
-  ToggleLeft,
-  ToggleRight,
-  X,
-  File,
-  Layers,
-  Check,
-  ArrowRight,
-  Zap,
-  ShieldCheck,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Edit,
-  Tag,
-  ChevronDown,
-  Loader2
-} from 'lucide-react';
+import { LayoutDashboard, FileText, CloudUpload as UploadCloud, History, Settings, LogOut, Bell, Search, Plus, MoveVertical as MoreVertical, CircleCheck as CheckCircle2, TriangleAlert as AlertTriangle, Clock, ChartBar as FileBarChart, ListFilter as Filter, Download, Trash2, Eye, Globe, ChartBar as BarChart3, ChartPie as PieChart, TrendingUp, Map, Calendar, User, CreditCard, Lock, Mail, Save, ToggleLeft, ToggleRight, X, File, Layers, Check, ArrowRight, Zap, ShieldCheck, ArrowUpDown, ArrowUp, ArrowDown, CreditCard as Edit, Tag, ChevronDown, Loader as Loader2 } from 'lucide-react';
 import { Button } from './Button';
 import { supabase } from '../lib/supabase';
 
