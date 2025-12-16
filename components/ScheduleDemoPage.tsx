@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Clock, User, Building, CheckCircle2, ChevronLeft, ChevronRight, BarChart3, Target, Factory } from 'lucide-react';
+import { X, ArrowLeft, Clock, User, Building, CheckCircle2, ChevronLeft, ChevronRight, BarChart3, Target, Factory } from 'lucide-react';
 import { Button } from './Button';
 
 interface ScheduleDemoPageProps {
@@ -197,10 +197,36 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
     setDirection(1);
     setCurrentStep(nextStep);
   };
-  
+
   const goBack = (prevStep: Step) => {
     setDirection(-1);
     setCurrentStep(prevStep);
+  };
+
+  const handleBackButton = () => {
+    switch (currentStep) {
+      case 'companyType':
+        onBack();
+        break;
+      case 'role':
+        goBack('companyType');
+        break;
+      case 'volume':
+        goBack('role');
+        break;
+      case 'challenge':
+        goBack('volume');
+        break;
+      case 'details':
+        goBack('challenge');
+        break;
+      case 'calendar':
+        goBack('details');
+        break;
+      case 'success':
+        onBack();
+        break;
+    }
   };
 
   // Calendar Helpers
@@ -635,6 +661,14 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
         <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600 rounded-full mix-blend-multiply filter blur-[150px] opacity-5"></div>
         <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#C1FF72] rounded-full mix-blend-overlay filter blur-[150px] opacity-5"></div>
       </div>
+
+      {/* Back button in top left */}
+      <button
+        onClick={handleBackButton}
+        className="absolute top-6 left-6 z-30 p-2 rounded-lg bg-neutral-900/50 border border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </button>
 
       {/* Close button in top right */}
       <button
