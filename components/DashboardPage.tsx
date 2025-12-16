@@ -58,7 +58,7 @@ interface DashboardPageProps {
 
 // Shared Document Interface
 interface Doc {
-  id: number;
+  id: string | number;
   name: string;
   date: string;
   type: string;
@@ -164,6 +164,39 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
   useEffect(() => {
     setNotifications(getMockNotifications(lang));
   }, [lang]);
+
+  // Load documents from database on mount
+  useEffect(() => {
+    const loadDocuments = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('documents')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const formattedDocs: Doc[] = data.map(doc => ({
+            id: doc.id,
+            name: doc.name,
+            date: new Date(doc.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            type: doc.type,
+            size: doc.size,
+            status: doc.status as 'verified' | 'risk' | 'processing' | 'queued',
+            issues: doc.status === 'risk' ? 1 : 0,
+            tags: doc.tags || [],
+            fileUrl: doc.file_url
+          }));
+          setAllDocs(formattedDocs);
+        }
+      } catch (error) {
+        console.error('Error loading documents:', error);
+      }
+    };
+
+    loadDocuments();
+  }, []);
   
   const t = {
     en: {
