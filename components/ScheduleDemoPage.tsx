@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Clock, User, Building, CheckCircle2, ChevronLeft, ChevronRight, BarChart3, Target, Factory } from 'lucide-react';
+import { X, Clock, User, Building, CheckCircle2, ChevronLeft, ChevronRight, BarChart3, Target, Factory } from 'lucide-react';
 import { Button } from './Button';
 
 interface ScheduleDemoPageProps {
@@ -349,12 +349,6 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
               </div>
            </div>
         )}
-
-        <div className="mt-8 flex justify-center">
-          <button onClick={() => goBack('companyType')} className="text-neutral-500 hover:text-white flex items-center gap-2 text-sm">
-              <ArrowLeft className="w-4 h-4" /> {text.back}
-          </button>
-        </div>
       </div>
     );
   };
@@ -378,11 +372,6 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
             <span className="font-medium text-base block">{v}</span>
           </button>
         ))}
-      </div>
-      <div className="mt-8 flex justify-center">
-        <button onClick={() => goBack('role')} className="text-neutral-500 hover:text-white flex items-center gap-2 text-sm">
-            <ArrowLeft className="w-4 h-4" /> {text.back}
-        </button>
       </div>
     </div>
   );
@@ -439,12 +428,6 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
               </div>
            </div>
         )}
-
-        <div className="mt-8 flex justify-center">
-          <button onClick={() => goBack('volume')} className="text-neutral-500 hover:text-white flex items-center gap-2 text-sm">
-              <ArrowLeft className="w-4 h-4" /> {text.back}
-          </button>
-        </div>
       </div>
     );
   };
@@ -525,12 +508,6 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
                 {text.next}
             </Button>
         </form>
-
-        <div className="mt-6 flex justify-center">
-            <button onClick={() => goBack('challenge')} className="text-neutral-500 hover:text-white flex items-center gap-2 text-sm">
-                <ArrowLeft className="w-4 h-4" /> {text.back}
-            </button>
-        </div>
     </div>
   );
 
@@ -619,12 +596,6 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
                 </div>
             </div>
         </div>
-
-        <div className="mt-8 flex justify-center">
-            <button onClick={() => goBack('details')} className="text-neutral-500 hover:text-white flex items-center gap-2 text-sm">
-                <ArrowLeft className="w-4 h-4" /> {text.back}
-            </button>
-        </div>
     </div>
   );
 
@@ -665,15 +636,13 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
         <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#C1FF72] rounded-full mix-blend-overlay filter blur-[150px] opacity-5"></div>
       </div>
 
-      <div className="w-full max-w-7xl mx-auto p-6 relative z-20">
-        <Button 
-          onClick={onBack}
-          className="!px-6 !py-3"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          {text.back}
-        </Button>
-      </div>
+      {/* Close button in top right */}
+      <button
+        onClick={onBack}
+        className="absolute top-6 right-6 z-30 p-2 rounded-lg bg-neutral-900/50 border border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all"
+      >
+        <X className="w-5 h-5" />
+      </button>
 
       <div className="flex-grow flex items-center justify-center p-6 relative z-10">
         <div className="w-full max-w-4xl">
