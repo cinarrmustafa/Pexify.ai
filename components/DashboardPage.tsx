@@ -2620,7 +2620,7 @@ const PlanDetailsModal = ({ lang, planName, planKey, details, text, onClose }: {
   onClose: () => void
 }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
       <div className="bg-[#0F0F0F] border border-neutral-800 rounded-3xl w-full max-w-4xl relative z-10 shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden max-h-[90vh] flex flex-col">
         <div className="p-6 border-b border-neutral-800 flex items-center justify-between bg-gradient-to-r from-[#0F0F0F] to-[#1A1A1A]">
