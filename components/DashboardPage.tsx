@@ -2810,16 +2810,27 @@ const PlanDetailsView = ({ lang, planKey, onBack }: {
   const details = planDetails[planKey];
   const planName = planNames[lang][planKey];
 
+  const upgradeText = lang === 'tr' ? 'Yükselt' : 'Upgrade';
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-6">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-neutral-400 hover:text-[#C1FF72] transition-colors mb-4"
-        >
-          <ArrowRight className="w-4 h-4 rotate-180" />
-          {text.back}
-        </button>
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-neutral-400 hover:text-[#C1FF72] transition-colors"
+          >
+            <ArrowRight className="w-4 h-4 rotate-180" />
+            {text.back}
+          </button>
+          <Button
+            onClick={onBack}
+            className="flex items-center gap-2"
+          >
+            <Zap className="w-4 h-4" />
+            {upgradeText}
+          </Button>
+        </div>
         <h1 className="text-3xl font-bold text-white mb-2">{planName}</h1>
         <p className="text-neutral-400">{text.planDetails}</p>
       </div>
