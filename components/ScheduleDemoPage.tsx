@@ -247,43 +247,43 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
           <Factory className="w-8 h-8 text-[#C1FF72]" />
         </div>
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">{text.steps.companyType}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-3 max-w-xl mx-auto">
           {text.options.companyTypes.map((c) => (
             <button
               key={c}
-              onClick={() => { 
-                setCompanyType(c); 
+              onClick={() => {
+                setCompanyType(c);
                 if (c !== otherOptionString) {
-                    goToStep('role'); 
+                    goToStep('role');
                 }
               }}
-              className={`p-6 rounded-xl border text-left transition-all duration-300 group
-                ${companyType === c 
-                  ? 'bg-[#C1FF72] border-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)]' 
+              className={`p-4 rounded-xl border text-left transition-all duration-300 group
+                ${companyType === c
+                  ? 'bg-[#C1FF72] border-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)]'
                   : 'bg-[#0A0A0A] border-neutral-800 text-neutral-300 hover:border-neutral-600 hover:bg-neutral-900'}`}
             >
-              <span className="font-medium text-lg block mb-1">{c}</span>
+              <span className="font-medium text-base block">{c}</span>
             </button>
           ))}
         </div>
 
         {/* Custom Input for "Other" */}
         {isOtherSelected && (
-           <div className="mt-6">
+           <div className="mt-6 max-w-xl mx-auto">
               <label className="text-sm font-medium text-neutral-400 mb-2 block">{text.steps.specifyType}</label>
-              <div className="flex gap-3 flex-col md:flex-row">
-                 <input 
-                    type="text" 
+              <div className="flex gap-3 flex-col">
+                 <input
+                    type="text"
                     value={customCompanyType}
                     onChange={(e) => setCustomCompanyType(e.target.value)}
                     placeholder={text.steps.specifyType + "..."}
-                    className="flex-grow h-12 px-4 bg-[#0A0A0A] border border-neutral-800 rounded-xl text-white text-sm focus:border-[#C1FF72] outline-none transition-all"
+                    className="w-full h-12 px-4 bg-[#0A0A0A] border border-neutral-800 rounded-xl text-white text-sm focus:border-[#C1FF72] outline-none transition-all"
                     autoFocus
                  />
-                 <Button 
-                    onClick={() => goToStep('role')} 
+                 <Button
+                    onClick={() => goToStep('role')}
                     disabled={!customCompanyType.trim()}
-                    className="md:w-auto w-full"
+                    className="w-full"
                  >
                     {text.next}
                  </Button>
@@ -304,7 +304,7 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
           <User className="w-8 h-8 text-[#C1FF72]" />
         </div>
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">{text.steps.role}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-3 max-w-xl mx-auto">
           {text.options.roles.map((r) => (
             <button
               key={r}
@@ -314,32 +314,32 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
                   goToStep('volume');
                 }
               }}
-              className={`p-6 rounded-xl border text-left transition-all duration-300 group
+              className={`p-4 rounded-xl border text-left transition-all duration-300 group
                 ${role === r
                   ? 'bg-[#C1FF72] border-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)]'
                   : 'bg-[#0A0A0A] border-neutral-800 text-neutral-300 hover:border-neutral-600 hover:bg-neutral-900'}`}
             >
-              <span className="font-medium text-lg block mb-1">{r}</span>
+              <span className="font-medium text-base block">{r}</span>
             </button>
           ))}
         </div>
 
         {isOtherSelected && (
-           <div className="mt-6">
+           <div className="mt-6 max-w-xl mx-auto">
               <label className="text-sm font-medium text-neutral-400 mb-2 block">{text.steps.specifyRole}</label>
-              <div className="flex gap-3 flex-col md:flex-row">
+              <div className="flex gap-3 flex-col">
                  <input
                     type="text"
                     value={customRole}
                     onChange={(e) => setCustomRole(e.target.value)}
                     placeholder={text.steps.specifyRole + "..."}
-                    className="flex-grow h-12 px-4 bg-[#0A0A0A] border border-neutral-800 rounded-xl text-white text-sm focus:border-[#C1FF72] outline-none transition-all"
+                    className="w-full h-12 px-4 bg-[#0A0A0A] border border-neutral-800 rounded-xl text-white text-sm focus:border-[#C1FF72] outline-none transition-all"
                     autoFocus
                  />
                  <Button
                     onClick={() => goToStep('volume')}
                     disabled={!customRole.trim()}
-                    className="md:w-auto w-full"
+                    className="w-full"
                  >
                     {text.next}
                  </Button>
@@ -362,17 +362,17 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
         <BarChart3 className="w-8 h-8 text-[#C1FF72]" />
       </div>
       <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">{text.steps.volume}</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="flex flex-col gap-3 max-w-xl mx-auto">
         {text.options.volumes.map((v) => (
           <button
             key={v}
             onClick={() => { setVolume(v); goToStep('challenge'); }}
-            className={`p-6 rounded-xl border text-left transition-all duration-300 group
-              ${volume === v 
-                ? 'bg-[#C1FF72] border-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)]' 
+            className={`p-4 rounded-xl border text-left transition-all duration-300 group
+              ${volume === v
+                ? 'bg-[#C1FF72] border-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)]'
                 : 'bg-[#0A0A0A] border-neutral-800 text-neutral-300 hover:border-neutral-600 hover:bg-neutral-900'}`}
           >
-            <span className="font-medium text-lg block mb-1">{v}</span>
+            <span className="font-medium text-base block">{v}</span>
           </button>
         ))}
       </div>
@@ -390,17 +390,17 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
         <Target className="w-8 h-8 text-[#C1FF72]" />
       </div>
       <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">{text.steps.challenge}</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="flex flex-col gap-3 max-w-xl mx-auto">
         {text.options.challenges.map((c) => (
           <button
             key={c}
             onClick={() => { setChallenge(c); goToStep('details'); }}
-            className={`p-6 rounded-xl border text-left transition-all duration-300 group
-              ${challenge === c 
-                ? 'bg-[#C1FF72] border-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)]' 
+            className={`p-4 rounded-xl border text-left transition-all duration-300 group
+              ${challenge === c
+                ? 'bg-[#C1FF72] border-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)]'
                 : 'bg-[#0A0A0A] border-neutral-800 text-neutral-300 hover:border-neutral-600 hover:bg-neutral-900'}`}
           >
-            <span className="font-medium text-lg block mb-1">{c}</span>
+            <span className="font-medium text-base block">{c}</span>
           </button>
         ))}
       </div>
