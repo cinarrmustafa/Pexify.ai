@@ -187,7 +187,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isAllNotificationsModalOpen, setIsAllNotificationsModalOpen] = useState(false);
-  
+
   // Active Action Modal State
   const [activeModal, setActiveModal] = useState<{ type: ModalActionType, doc: Doc | null }>({ type: null, doc: null });
 
@@ -196,6 +196,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [userPlan, setUserPlan] = useState<PlanType>('Growth');
+  const [selectedPlanForDetails, setSelectedPlanForDetails] = useState<PlanType | null>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const notificationTimeouts = useRef<Record<number, NodeJS.Timeout>>({});
 
@@ -661,9 +662,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
 
   return (
     <div className="min-h-screen bg-black flex font-sans text-white overflow-hidden">
-      
+
       {/* Sidebar */}
-      <aside className="w-64 border-r border-neutral-900 bg-[#050505] flex-shrink-0 hidden md:flex flex-col">
+      <aside className="w-64 border-r border-neutral-900 bg-[#050505] flex-shrink-0 hidden md:flex flex-col relative z-10">
         <button 
           onClick={() => setActiveTab('dashboard')}
           className="pl-6 py-6 h-24 flex items-center gap-2 w-full text-left outline-none"
@@ -926,11 +927,22 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
                 />
               )}
               {activeTab === 'upgrade' && (
-                <UpgradeView 
-                  lang={lang} 
-                  text={text.upgrade} 
+                <UpgradeView
+                  lang={lang}
+                  text={text.upgrade}
                   currentPlanId={userPlan}
                   onPlanSelect={handlePlanChange}
+                  onViewDetails={(plan) => {
+                    setSelectedPlanForDetails(plan);
+                    setActiveTab('plan-details');
+                  }}
+                />
+              )}
+              {activeTab === 'plan-details' && selectedPlanForDetails && (
+                <PlanDetailsView
+                  lang={lang}
+                  planKey={selectedPlanForDetails}
+                  onBack={() => setActiveTab('upgrade')}
                 />
               )}
             </div>
@@ -2345,8 +2357,7 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
   );
 };
 
-const UpgradeView = ({ lang, text, currentPlanId, onPlanSelect }: { lang: 'en' | 'tr', text: any, currentPlanId: PlanType, onPlanSelect: (p: PlanType) => void }) => {
-  const [selectedPlanForDetails, setSelectedPlanForDetails] = useState<PlanType | null>(null);
+const UpgradeView = ({ lang, text, currentPlanId, onPlanSelect, onViewDetails }: { lang: 'en' | 'tr', text: any, currentPlanId: PlanType, onPlanSelect: (p: PlanType) => void, onViewDetails?: (p: PlanType) => void }) => {
 
   const detailsText = {
     en: {
@@ -2574,7 +2585,7 @@ const UpgradeView = ({ lang, text, currentPlanId, onPlanSelect }: { lang: 'en' |
                             {isCurrent ? text.current : tier.price === 'Custom' || tier.price === 'Özel' ? text.contact : text.switch}
                         </Button>
                         <button
-                          onClick={() => setSelectedPlanForDetails(planKey)}
+                          onClick={() => onViewDetails && onViewDetails(planKey)}
                           className="w-full py-2.5 text-sm text-neutral-400 hover:text-[#C1FF72] transition-colors border border-neutral-800 hover:border-[#C1FF72]/30 rounded-xl font-medium"
                         >
                           {t.viewDetails}
@@ -2596,122 +2607,290 @@ const UpgradeView = ({ lang, text, currentPlanId, onPlanSelect }: { lang: 'en' |
           <Button variant="outline">{text.security.btn}</Button>
         </div>
       </div>
-
-      {selectedPlanForDetails && (
-        <PlanDetailsModal
-          lang={lang}
-          planName={text.tiers[['Starter', 'Growth', 'Enterprise'].indexOf(selectedPlanForDetails)].name}
-          planKey={selectedPlanForDetails}
-          details={planDetails[selectedPlanForDetails]}
-          text={t}
-          onClose={() => setSelectedPlanForDetails(null)}
-        />
-      )}
     </>
   );
 };
 
-const PlanDetailsModal = ({ lang, planName, planKey, details, text, onClose }: {
+const PlanDetailsView = ({ lang, planKey, onBack }: {
   lang: 'en' | 'tr',
-  planName: string,
   planKey: PlanType,
-  details: any,
-  text: any,
-  onClose: () => void
+  onBack: () => void
 }) => {
+  const detailsText = {
+    en: {
+      planDetails: "Plan Details",
+      limits: "Limits & Usage",
+      support: "Support",
+      integration: "Integration",
+      security: "Security",
+      back: "Back to Plans"
+    },
+    tr: {
+      planDetails: "Plan Detayları",
+      limits: "Limitler & Kullanım",
+      support: "Destek",
+      integration: "Entegrasyon",
+      security: "Güvenlik",
+      back: "Planlara Dön"
+    }
+  };
+
+  const text = detailsText[lang];
+
+  const planNames = {
+    en: {
+      Starter: "Starter Plan",
+      Growth: "Growth Plan",
+      Enterprise: "Enterprise Plan"
+    },
+    tr: {
+      Starter: "Başlangıç Planı",
+      Growth: "Büyüme Planı",
+      Enterprise: "Kurumsal Plan"
+    }
+  };
+
+  const planDetails = {
+    Starter: {
+      limits: lang === 'tr' ? [
+        "Ayda 500 belge işleme",
+        "Maksimum 25MB dosya boyutu",
+        "1 aktif kullanıcı",
+        "30 gün veri saklama"
+      ] : [
+        "500 documents per month",
+        "Maximum 25MB file size",
+        "1 active user",
+        "30 days data retention"
+      ],
+      support: lang === 'tr' ? [
+        "E-posta desteği (48 saat)",
+        "Dokümantasyon erişimi",
+        "Topluluk forumu"
+      ] : [
+        "Email support (48 hours)",
+        "Documentation access",
+        "Community forum"
+      ],
+      integration: lang === 'tr' ? [
+        "Temel API erişimi",
+        "Webhook desteği",
+        "CSV/Excel dışa aktarma"
+      ] : [
+        "Basic API access",
+        "Webhook support",
+        "CSV/Excel export"
+      ],
+      security: lang === 'tr' ? [
+        "SSL şifreleme",
+        "İki faktörlü kimlik doğrulama",
+        "Temel güvenlik raporları"
+      ] : [
+        "SSL encryption",
+        "Two-factor authentication",
+        "Basic security reports"
+      ]
+    },
+    Growth: {
+      limits: lang === 'tr' ? [
+        "Ayda 2,500 belge işleme",
+        "Maksimum 100MB dosya boyutu",
+        "5 aktif kullanıcı",
+        "1 yıl veri saklama",
+        "Öncelikli işleme kuyruğu"
+      ] : [
+        "2,500 documents per month",
+        "Maximum 100MB file size",
+        "5 active users",
+        "1 year data retention",
+        "Priority processing queue"
+      ],
+      support: lang === 'tr' ? [
+        "Öncelikli e-posta desteği (24 saat)",
+        "Canlı sohbet desteği",
+        "Video eğitim materyalleri",
+        "Özel onboarding"
+      ] : [
+        "Priority email support (24 hours)",
+        "Live chat support",
+        "Video training materials",
+        "Custom onboarding"
+      ],
+      integration: lang === 'tr' ? [
+        "Gelişmiş API erişimi",
+        "ERP sistemleri entegrasyonu",
+        "Özel webhook'lar",
+        "Otomatik veri senkronizasyonu",
+        "REST API & GraphQL"
+      ] : [
+        "Advanced API access",
+        "ERP system integration",
+        "Custom webhooks",
+        "Automatic data sync",
+        "REST API & GraphQL"
+      ],
+      security: lang === 'tr' ? [
+        "SSL/TLS şifreleme",
+        "İki faktörlü kimlik doğrulama",
+        "Gelişmiş güvenlik raporları",
+        "Denetim günlükleri",
+        "IP kısıtlamaları"
+      ] : [
+        "SSL/TLS encryption",
+        "Two-factor authentication",
+        "Advanced security reports",
+        "Audit logs",
+        "IP restrictions"
+      ]
+    },
+    Enterprise: {
+      limits: lang === 'tr' ? [
+        "Sınırsız belge işleme",
+        "Özel dosya boyutu limiti",
+        "Sınırsız kullanıcı",
+        "Özel veri saklama süresi",
+        "Özel sunucu kaynakları"
+      ] : [
+        "Unlimited documents",
+        "Custom file size limit",
+        "Unlimited users",
+        "Custom data retention",
+        "Dedicated server resources"
+      ],
+      support: lang === 'tr' ? [
+        "7/24 özel destek ekibi",
+        "Özel hesap yöneticisi",
+        "Telefon desteği",
+        "Yerinde eğitim",
+        "SLA garantisi (99.9%)",
+        "Acil müdahale hattı"
+      ] : [
+        "24/7 dedicated support team",
+        "Dedicated account manager",
+        "Phone support",
+        "On-site training",
+        "SLA guarantee (99.9%)",
+        "Emergency hotline"
+      ],
+      integration: lang === 'tr' ? [
+        "Sınırsız API erişimi",
+        "Özel ERP entegrasyonu",
+        "Gelişmiş webhook'lar",
+        "Gerçek zamanlı veri senkronizasyonu",
+        "REST & GraphQL API",
+        "Özel entegrasyon geliştirme"
+      ] : [
+        "Unlimited API access",
+        "Custom ERP integration",
+        "Advanced webhooks",
+        "Real-time data sync",
+        "REST & GraphQL API",
+        "Custom integration development"
+      ],
+      security: lang === 'tr' ? [
+        "Kurumsal SSL/TLS",
+        "SSO & SAML entegrasyonu",
+        "Gelişmiş erişim kontrolleri",
+        "Detaylı denetim günlükleri",
+        "IP whitelist/blacklist",
+        "Özel güvenlik politikaları",
+        "Veri şifreleme (rest & transit)"
+      ] : [
+        "Enterprise SSL/TLS",
+        "SSO & SAML integration",
+        "Advanced access controls",
+        "Detailed audit logs",
+        "IP whitelist/blacklist",
+        "Custom security policies",
+        "Data encryption (rest & transit)"
+      ]
+    }
+  };
+
+  const details = planDetails[planKey];
+  const planName = planNames[lang][planKey];
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="bg-[#0F0F0F] border border-neutral-800 rounded-3xl w-full max-w-4xl relative z-10 shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden max-h-[90vh] flex flex-col">
-        <div className="p-6 border-b border-neutral-800 flex items-center justify-between bg-gradient-to-r from-[#0F0F0F] to-[#1A1A1A]">
-          <div>
-            <h3 className="text-2xl font-bold text-white mb-1">{planName}</h3>
-            <p className="text-sm text-neutral-400">{text.planDetails}</p>
+    <div className="max-w-6xl mx-auto">
+      <div className="mb-6">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-neutral-400 hover:text-[#C1FF72] transition-colors mb-4"
+        >
+          <ArrowRight className="w-4 h-4 rotate-180" />
+          {text.back}
+        </button>
+        <h1 className="text-3xl font-bold text-white mb-2">{planName}</h1>
+        <p className="text-neutral-400">{text.planDetails}</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-6 hover:border-[#C1FF72]/30 transition-all">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-[#C1FF72]/10 flex items-center justify-center">
+              <BarChart3 className="w-5 h-5 text-[#C1FF72]" />
+            </div>
+            <h4 className="text-lg font-semibold text-white">{text.limits}</h4>
           </div>
-          <button
-            onClick={onClose}
-            className="text-neutral-500 hover:text-white transition-colors p-2 hover:bg-neutral-800 rounded-lg"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <ul className="space-y-3">
+            {details.limits.map((item: string, i: number) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
+                <Check className="w-4 h-4 mt-0.5 text-[#C1FF72] shrink-0" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-6 hover:border-[#C1FF72]/30 transition-all">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-[#C1FF72]/10 flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-[#C1FF72]" />
-                </div>
-                <h4 className="text-lg font-semibold text-white">{text.limits}</h4>
-              </div>
-              <ul className="space-y-3">
-                {details.limits.map((item: string, i: number) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
-                    <Check className="w-4 h-4 mt-0.5 text-[#C1FF72] shrink-0" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
+        <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-6 hover:border-[#C1FF72]/30 transition-all">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-[#C1FF72]/10 flex items-center justify-center">
+              <User className="w-5 h-5 text-[#C1FF72]" />
             </div>
-
-            <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-6 hover:border-[#C1FF72]/30 transition-all">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-[#C1FF72]/10 flex items-center justify-center">
-                  <User className="w-5 h-5 text-[#C1FF72]" />
-                </div>
-                <h4 className="text-lg font-semibold text-white">{text.support}</h4>
-              </div>
-              <ul className="space-y-3">
-                {details.support.map((item: string, i: number) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
-                    <Check className="w-4 h-4 mt-0.5 text-[#C1FF72] shrink-0" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-6 hover:border-[#C1FF72]/30 transition-all">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-[#C1FF72]/10 flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-[#C1FF72]" />
-                </div>
-                <h4 className="text-lg font-semibold text-white">{text.integration}</h4>
-              </div>
-              <ul className="space-y-3">
-                {details.integration.map((item: string, i: number) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
-                    <Check className="w-4 h-4 mt-0.5 text-[#C1FF72] shrink-0" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-6 hover:border-[#C1FF72]/30 transition-all">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-[#C1FF72]/10 flex items-center justify-center">
-                  <ShieldCheck className="w-5 h-5 text-[#C1FF72]" />
-                </div>
-                <h4 className="text-lg font-semibold text-white">{text.security}</h4>
-              </div>
-              <ul className="space-y-3">
-                {details.security.map((item: string, i: number) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
-                    <Check className="w-4 h-4 mt-0.5 text-[#C1FF72] shrink-0" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <h4 className="text-lg font-semibold text-white">{text.support}</h4>
           </div>
+          <ul className="space-y-3">
+            {details.support.map((item: string, i: number) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
+                <Check className="w-4 h-4 mt-0.5 text-[#C1FF72] shrink-0" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <div className="p-6 border-t border-neutral-800 bg-[#0A0A0A]">
-          <Button onClick={onClose} className="w-full md:w-auto md:ml-auto flex">
-            {text.close}
-          </Button>
+        <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-6 hover:border-[#C1FF72]/30 transition-all">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-[#C1FF72]/10 flex items-center justify-center">
+              <Zap className="w-5 h-5 text-[#C1FF72]" />
+            </div>
+            <h4 className="text-lg font-semibold text-white">{text.integration}</h4>
+          </div>
+          <ul className="space-y-3">
+            {details.integration.map((item: string, i: number) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
+                <Check className="w-4 h-4 mt-0.5 text-[#C1FF72] shrink-0" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-6 hover:border-[#C1FF72]/30 transition-all">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-[#C1FF72]/10 flex items-center justify-center">
+              <ShieldCheck className="w-5 h-5 text-[#C1FF72]" />
+            </div>
+            <h4 className="text-lg font-semibold text-white">{text.security}</h4>
+          </div>
+          <ul className="space-y-3">
+            {details.security.map((item: string, i: number) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
+                <Check className="w-4 h-4 mt-0.5 text-[#C1FF72] shrink-0" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
