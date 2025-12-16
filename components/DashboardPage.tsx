@@ -1700,7 +1700,8 @@ const AnalyticsView = ({ lang, currency }: { lang: 'en' | 'tr', currency: { code
         weight: lang === 'tr' ? 'Ağırlık Uyuşmazlığı' : 'Weight Mismatch',
         date: lang === 'tr' ? 'Tarih Formatı' : 'Date Format',
         missing: lang === 'tr' ? 'Eksik Alanlar' : 'Missing Fields',
-        hsCode: lang === 'tr' ? 'GTİP Kodu Hatası' : 'HS Code Error'
+        hsCode: lang === 'tr' ? 'GTİP Kodu Hatası' : 'HS Code Error',
+        other: lang === 'tr' ? 'Diğer' : 'Other'
     },
     vsPrevious: lang === 'tr' ? 'önceki döneme göre' : 'vs previous period',
     viewModes: {
@@ -1850,7 +1851,8 @@ const AnalyticsView = ({ lang, currency }: { lang: 'en' | 'tr', currency: { code
                         { label: t.errors.weight, val: 45, color: 'bg-red-500' },
                         { label: t.errors.date, val: 30, color: 'bg-yellow-500' },
                         { label: t.errors.missing, val: 15, color: 'bg-blue-500' },
-                        { label: t.errors.hsCode, val: 10, color: 'bg-purple-500' }
+                        { label: t.errors.hsCode, val: 10, color: 'bg-purple-500' },
+                        { label: t.errors.other, val: 5, color: 'bg-teal-500' }
                     ].map((item, i) => (
                         <div key={i}>
                             <div className="flex justify-between text-xs mb-1">
