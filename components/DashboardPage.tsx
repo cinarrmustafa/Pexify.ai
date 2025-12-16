@@ -218,6 +218,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
     setNotifications(getMockNotifications(lang));
   }, [lang]);
 
+  // Scroll to top when switching to plan details
+  useEffect(() => {
+    if (activeTab === 'plan-details') {
+      window.scrollTo(0, 0);
+    }
+  }, [activeTab]);
+
   // Load documents from database on mount
   useEffect(() => {
     const loadDocuments = async () => {
