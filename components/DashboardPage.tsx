@@ -153,6 +153,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
     marketing: true
   });
 
+  // Currency setting
+  const [currency, setCurrency] = useState({
+    code: 'USD',
+    symbol: '$'
+  });
+
   // Update notifications when language changes
   useEffect(() => {
     setNotifications(getMockNotifications(lang));
@@ -743,15 +749,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
 
             <div className="relative z-10 p-4 md:p-8">
               {activeTab === 'dashboard' && (
-                <DashboardHomeView 
-                  lang={lang} 
-                  docs={filteredDocs} 
-                  onUpload={handleFileUpload} 
+                <DashboardHomeView
+                  lang={lang}
+                  docs={filteredDocs}
+                  onUpload={handleFileUpload}
                   onAnalyze={handleAnalyze}
                   onViewAll={() => setActiveTab('documents')}
                   onDelete={handleDeleteDoc}
                   onAction={handleAction}
                   text={text}
+                  currency={currency}
                 />
               )}
               {activeTab === 'documents' && (
@@ -762,16 +769,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
                   onAction={handleAction}
                 />
               )}
-              {activeTab === 'analytics' && <AnalyticsView lang={lang} />}
+              {activeTab === 'analytics' && <AnalyticsView lang={lang} currency={currency} />}
               {activeTab === 'settings' && (
-                <SettingsView 
-                  lang={lang} 
+                <SettingsView
+                  lang={lang}
                   avatar={userAvatar}
                   onAvatarChange={setUserAvatar}
                   notifications={notificationSettings}
                   onToggleNotification={handleToggleNotification}
                   onUpgradeClick={() => setActiveTab('upgrade')}
                   currentPlanName={getLocalizedPlanName()}
+                  currency={currency}
+                  onCurrencyChange={setCurrency}
                 />
               )}
               {activeTab === 'upgrade' && (
@@ -1071,24 +1080,26 @@ const UploadModal = ({
   );
 };
 
-const DashboardHomeView = ({ 
-  lang, 
-  docs, 
+const DashboardHomeView = ({
+  lang,
+  docs,
   onUpload,
   onAnalyze,
   onViewAll,
   onDelete,
   onAction,
-  text
-}: { 
-  lang: 'en' | 'tr', 
-  docs: Doc[], 
+  text,
+  currency
+}: {
+  lang: 'en' | 'tr',
+  docs: Doc[],
   onUpload: (files: File[]) => void,
   onAnalyze: () => void,
   onViewAll: () => void,
   onDelete: (id: number) => void,
   onAction: (type: ModalActionType, doc: Doc) => void,
-  text: any
+  text: any,
+  currency: { code: string, symbol: string }
 }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
@@ -1143,7 +1154,7 @@ const DashboardHomeView = ({
         <StatCard label={text.stats.totalDocs} value={`${1248 + docs.length}`} change="+12%" icon={FileText} />
         <StatCard label={text.stats.issuesFound} value="142" change="-5%" isPositive icon={AlertTriangle} />
         <StatCard label={text.stats.accuracy} value="99.8%" change="+0.2%" icon={CheckCircle2} />
-        <StatCard label={text.stats.savings} value="$12.5k" change="+8%" icon={History} />
+        <StatCard label={text.stats.savings} value={`${currency.symbol}12.5k`} change="+8%" icon={History} />
       </div>
 
       <div className="space-y-8">
@@ -1651,7 +1662,7 @@ const StatusBadge = ({ status, textMap }: any) => {
   );
 };
 
-const AnalyticsView = ({ lang }: { lang: 'en' | 'tr' }) => {
+const AnalyticsView = ({ lang, currency }: { lang: 'en' | 'tr', currency: { code: string, symbol: string } }) => {
   const [timeRange, setTimeRange] = useState<'30d' | '3m' | '6m' | '1y' | 'all'>('30d');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -1739,7 +1750,7 @@ const AnalyticsView = ({ lang }: { lang: 'en' | 'tr' }) => {
                     <span className="text-neutral-400 text-sm">{t.cards.savings}</span>
                     <History className="w-5 h-5 text-[#C1FF72]" />
                 </div>
-                <div className="text-3xl font-bold text-white">${(2450 * multiplier).toLocaleString()}</div>
+                <div className="text-3xl font-bold text-white">{currency.symbol}{(2450 * multiplier).toLocaleString()}</div>
                 <div className="text-xs text-green-500 mt-2">+8% {t.vsPrevious}</div>
             </div>
             <div className="bg-[#0A0A0A] border border-neutral-800 p-6 rounded-2xl">
@@ -1797,7 +1808,7 @@ const AnalyticsView = ({ lang }: { lang: 'en' | 'tr' }) => {
   );
 };
 
-const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNotification, onUpgradeClick, currentPlanName }: any) => {
+const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNotification, onUpgradeClick, currentPlanName, currency, onCurrencyChange }: any) => {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -1812,13 +1823,32 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
   };
 
   const t = {
-    titles: { profile: lang === 'tr' ? 'Profil' : 'Profile', notif: lang === 'tr' ? 'Bildirimler' : 'Notifications', security: lang === 'tr' ? 'Güvenlik' : 'Security', billing: lang === 'tr' ? 'Ödeme ve Plan' : 'Billing & Plan' },
-    desc: { profile: lang === 'tr' ? 'Hesap detaylarınızı ve profilinizi yönetin.' : 'Manage your account details and profile.', notif: lang === 'tr' ? 'Uyarıları ve raporları nasıl alacağınızı yönetin.' : 'Manage how you receive alerts and reports.', billing: lang === 'tr' ? 'Aboneliğinizi ve ödeme yönteminizi yönetin.' : 'Manage your subscription and payment method.' },
-    labels: { name: lang === 'tr' ? 'İsim' : 'Name', email: lang === 'tr' ? 'E-posta' : 'Email', company: lang === 'tr' ? 'Şirket' : 'Company' },
+    titles: { profile: lang === 'tr' ? 'Profil' : 'Profile', notif: lang === 'tr' ? 'Bildirimler' : 'Notifications', security: lang === 'tr' ? 'Güvenlik' : 'Security', billing: lang === 'tr' ? 'Ödeme ve Plan' : 'Billing & Plan', preferences: lang === 'tr' ? 'Tercihler' : 'Preferences' },
+    desc: { profile: lang === 'tr' ? 'Hesap detaylarınızı ve profilinizi yönetin.' : 'Manage your account details and profile.', notif: lang === 'tr' ? 'Uyarıları ve raporları nasıl alacağınızı yönetin.' : 'Manage how you receive alerts and reports.', billing: lang === 'tr' ? 'Aboneliğinizi ve ödeme yönteminizi yönetin.' : 'Manage your subscription and payment method.', preferences: lang === 'tr' ? 'Para birimi ve diğer görüntüleme tercihlerinizi ayarlayın.' : 'Set your currency and other display preferences.' },
+    labels: { name: lang === 'tr' ? 'İsim' : 'Name', email: lang === 'tr' ? 'E-posta' : 'Email', company: lang === 'tr' ? 'Şirket' : 'Company', currency: lang === 'tr' ? 'Para Birimi' : 'Currency' },
     buttons: { save: lang === 'tr' ? 'Değişiklikleri Kaydet' : 'Save Changes', changeAvatar: lang === 'tr' ? 'Avatar Değiştir' : 'Change Avatar', upgrade: lang === 'tr' ? 'Yükselt' : 'Upgrade' },
     notifs: { error: lang === 'tr' ? 'Hata Uyarıları' : 'Error Alerts', weekly: lang === 'tr' ? 'Haftalık Özetler' : 'Weekly Summaries', marketing: lang === 'tr' ? 'Ürün Güncellemeleri' : 'Product Updates' },
     billing: { current: lang === 'tr' ? 'MEVCUT PLAN' : 'CURRENT PLAN', next: lang === 'tr' ? 'SONRAKİ FATURA TARİHİ' : 'NEXT BILLING DATE' }
   };
+
+  const currencies = [
+    { code: 'USD', symbol: '$', name: lang === 'tr' ? 'ABD Doları' : 'US Dollar' },
+    { code: 'EUR', symbol: '€', name: lang === 'tr' ? 'Euro' : 'Euro' },
+    { code: 'GBP', symbol: '£', name: lang === 'tr' ? 'İngiliz Sterlini' : 'British Pound' },
+    { code: 'TRY', symbol: '₺', name: lang === 'tr' ? 'Türk Lirası' : 'Turkish Lira' },
+    { code: 'JPY', symbol: '¥', name: lang === 'tr' ? 'Japon Yeni' : 'Japanese Yen' },
+    { code: 'CNY', symbol: '¥', name: lang === 'tr' ? 'Çin Yuanı' : 'Chinese Yuan' },
+    { code: 'INR', symbol: '₹', name: lang === 'tr' ? 'Hint Rupisi' : 'Indian Rupee' },
+    { code: 'AUD', symbol: 'A$', name: lang === 'tr' ? 'Avustralya Doları' : 'Australian Dollar' },
+    { code: 'CAD', symbol: 'C$', name: lang === 'tr' ? 'Kanada Doları' : 'Canadian Dollar' },
+    { code: 'CHF', symbol: 'CHF', name: lang === 'tr' ? 'İsviçre Frangı' : 'Swiss Franc' },
+    { code: 'KRW', symbol: '₩', name: lang === 'tr' ? 'Güney Kore Wonu' : 'South Korean Won' },
+    { code: 'BRL', symbol: 'R$', name: lang === 'tr' ? 'Brezilya Reali' : 'Brazilian Real' },
+    { code: 'MXN', symbol: 'MX$', name: lang === 'tr' ? 'Meksika Pesosu' : 'Mexican Peso' },
+    { code: 'SGD', symbol: 'S$', name: lang === 'tr' ? 'Singapur Doları' : 'Singapore Dollar' },
+    { code: 'AED', symbol: 'AED', name: lang === 'tr' ? 'BAE Dirhemi' : 'UAE Dirham' },
+    { code: 'SAR', symbol: 'SAR', name: lang === 'tr' ? 'Suudi Riyali' : 'Saudi Riyal' }
+  ];
 
   return (
     <div className="max-w-4xl space-y-8">
@@ -1889,6 +1919,32 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
             </div>
         </div>
 
+        {/* Preferences */}
+        <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-8">
+            <h3 className="text-lg font-semibold text-white mb-1">{t.titles.preferences}</h3>
+            <p className="text-sm text-neutral-500 mb-8">{t.desc.preferences}</p>
+
+            <div className="space-y-4">
+                <label className="text-xs text-neutral-500 uppercase">{t.labels.currency}</label>
+                <select
+                    value={currency.code}
+                    onChange={(e) => {
+                        const selected = currencies.find(c => c.code === e.target.value);
+                        if (selected) {
+                            onCurrencyChange({ code: selected.code, symbol: selected.symbol });
+                        }
+                    }}
+                    className="w-full bg-[#0F0F0F] border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white focus:border-[#C1FF72] outline-none cursor-pointer"
+                >
+                    {currencies.map((curr) => (
+                        <option key={curr.code} value={curr.code}>
+                            {curr.symbol} {curr.code} - {curr.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        </div>
+
         {/* Billing */}
         <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-8">
             <h3 className="text-lg font-semibold text-white mb-1">{t.titles.billing}</h3>
@@ -1899,7 +1955,7 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
                     <p className="text-xs text-neutral-500 uppercase mb-2">{t.billing.current}</p>
                     <div className="flex items-end justify-between">
                         <h4 className="text-xl font-bold text-white">{currentPlanName}</h4>
-                        <span className="text-[#C1FF72] text-sm font-mono">$599/mo</span>
+                        <span className="text-[#C1FF72] text-sm font-mono">{currency.symbol}599/{lang === 'tr' ? 'ay' : 'mo'}</span>
                     </div>
                     <button 
                         onClick={onUpgradeClick}
