@@ -1839,6 +1839,7 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
     { code: 'JPY', symbol: '¥', name: lang === 'tr' ? 'Japon Yeni' : 'Japanese Yen' },
     { code: 'CNY', symbol: '¥', name: lang === 'tr' ? 'Çin Yuanı' : 'Chinese Yuan' },
     { code: 'INR', symbol: '₹', name: lang === 'tr' ? 'Hint Rupisi' : 'Indian Rupee' },
+    { code: 'RUB', symbol: '₽', name: lang === 'tr' ? 'Rus Rublesi' : 'Russian Ruble' },
     { code: 'AUD', symbol: 'A$', name: lang === 'tr' ? 'Avustralya Doları' : 'Australian Dollar' },
     { code: 'CAD', symbol: 'C$', name: lang === 'tr' ? 'Kanada Doları' : 'Canadian Dollar' },
     { code: 'CHF', symbol: 'CHF', name: lang === 'tr' ? 'İsviçre Frangı' : 'Swiss Franc' },
@@ -1846,8 +1847,27 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
     { code: 'BRL', symbol: 'R$', name: lang === 'tr' ? 'Brezilya Reali' : 'Brazilian Real' },
     { code: 'MXN', symbol: 'MX$', name: lang === 'tr' ? 'Meksika Pesosu' : 'Mexican Peso' },
     { code: 'SGD', symbol: 'S$', name: lang === 'tr' ? 'Singapur Doları' : 'Singapore Dollar' },
+    { code: 'HKD', symbol: 'HK$', name: lang === 'tr' ? 'Hong Kong Doları' : 'Hong Kong Dollar' },
+    { code: 'NZD', symbol: 'NZ$', name: lang === 'tr' ? 'Yeni Zelanda Doları' : 'New Zealand Dollar' },
+    { code: 'SEK', symbol: 'kr', name: lang === 'tr' ? 'İsveç Kronu' : 'Swedish Krona' },
+    { code: 'NOK', symbol: 'kr', name: lang === 'tr' ? 'Norveç Kronu' : 'Norwegian Krone' },
+    { code: 'DKK', symbol: 'kr', name: lang === 'tr' ? 'Danimarka Kronu' : 'Danish Krone' },
+    { code: 'PLN', symbol: 'zł', name: lang === 'tr' ? 'Polonya Zlotisi' : 'Polish Zloty' },
+    { code: 'CZK', symbol: 'Kč', name: lang === 'tr' ? 'Çek Korunası' : 'Czech Koruna' },
+    { code: 'HUF', symbol: 'Ft', name: lang === 'tr' ? 'Macar Forinti' : 'Hungarian Forint' },
+    { code: 'RON', symbol: 'lei', name: lang === 'tr' ? 'Romanya Leyi' : 'Romanian Leu' },
+    { code: 'THB', symbol: '฿', name: lang === 'tr' ? 'Tayland Bahtı' : 'Thai Baht' },
+    { code: 'MYR', symbol: 'RM', name: lang === 'tr' ? 'Malezya Ringiti' : 'Malaysian Ringgit' },
+    { code: 'IDR', symbol: 'Rp', name: lang === 'tr' ? 'Endonezya Rupisi' : 'Indonesian Rupiah' },
+    { code: 'PHP', symbol: '₱', name: lang === 'tr' ? 'Filipin Pesosu' : 'Philippine Peso' },
+    { code: 'VND', symbol: '₫', name: lang === 'tr' ? 'Vietnam Dongu' : 'Vietnamese Dong' },
+    { code: 'ZAR', symbol: 'R', name: lang === 'tr' ? 'Güney Afrika Randı' : 'South African Rand' },
+    { code: 'ILS', symbol: '₪', name: lang === 'tr' ? 'İsrail Şekeli' : 'Israeli Shekel' },
     { code: 'AED', symbol: 'AED', name: lang === 'tr' ? 'BAE Dirhemi' : 'UAE Dirham' },
-    { code: 'SAR', symbol: 'SAR', name: lang === 'tr' ? 'Suudi Riyali' : 'Saudi Riyal' }
+    { code: 'SAR', symbol: 'SAR', name: lang === 'tr' ? 'Suudi Riyali' : 'Saudi Riyal' },
+    { code: 'QAR', symbol: 'QR', name: lang === 'tr' ? 'Katar Riyali' : 'Qatari Riyal' },
+    { code: 'KWD', symbol: 'KD', name: lang === 'tr' ? 'Kuveyt Dinarı' : 'Kuwaiti Dinar' },
+    { code: 'EGP', symbol: 'E£', name: lang === 'tr' ? 'Mısır Poundu' : 'Egyptian Pound' }
   ];
 
   return (
