@@ -110,6 +110,57 @@ const getDocTypeTranslation = (type: string, lang: 'en' | 'tr') => {
   return map[type] || type;
 };
 
+const translateTag = (tag: string, lang: 'en' | 'tr') => {
+  const tagMap: Record<string, Record<string, string>> = {
+    'tr': {
+      "Urgent": "Acil",
+      "urgent": "Acil",
+      "Reviewed": "İncelendi",
+      "reviewed": "İncelendi",
+      "Approved": "Onaylandı",
+      "approved": "Onaylandı",
+      "Pending": "Bekliyor",
+      "pending": "Bekliyor",
+      "Draft": "Taslak",
+      "draft": "Taslak",
+      "Final": "Final",
+      "final": "Final",
+      "Important": "Önemli",
+      "important": "Önemli",
+      "Priority": "Öncelikli",
+      "priority": "Öncelikli",
+      "Archived": "Arşivlendi",
+      "archived": "Arşivlendi",
+      "Completed": "Tamamlandı",
+      "completed": "Tamamlandı"
+    },
+    'en': {
+      "Acil": "Urgent",
+      "acil": "Urgent",
+      "İncelendi": "Reviewed",
+      "incelendi": "Reviewed",
+      "Onaylandı": "Approved",
+      "onaylandı": "Approved",
+      "Bekliyor": "Pending",
+      "bekliyor": "Pending",
+      "Taslak": "Draft",
+      "taslak": "Draft",
+      "Final": "Final",
+      "final": "Final",
+      "Önemli": "Important",
+      "önemli": "Important",
+      "Öncelikli": "Priority",
+      "öncelikli": "Priority",
+      "Arşivlendi": "Archived",
+      "arşivlendi": "Archived",
+      "Tamamlandı": "Completed",
+      "tamamlandı": "Completed"
+    }
+  };
+
+  return tagMap[lang]?.[tag] || tag;
+};
+
 const getMockNotifications = (lang: 'en' | 'tr') => {
   if (lang === 'tr') {
     return [
@@ -873,11 +924,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
         )}
 
         {activeModal.type === 'tag' && activeModal.doc && (
-          <TagDocModal 
-            doc={activeModal.doc} 
-            text={text.actionModals} 
+          <TagDocModal
+            doc={activeModal.doc}
+            lang={lang}
+            text={text.actionModals}
             onClose={() => setActiveModal({ type: null, doc: null })}
-            onAdd={(id, tag) => handleAddTag(id, tag)} 
+            onAdd={(id, tag) => handleAddTag(id, tag)}
           />
         )}
       </main>
@@ -1100,7 +1152,7 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose, onUpdate }: { doc: 
                       key={i}
                       className="px-2 py-1 bg-neutral-800 text-white text-xs rounded border border-neutral-700 flex items-center gap-1"
                     >
-                      {tag}
+                      {translateTag(tag, lang)}
                       {isEditing && (
                         <button
                           onClick={() => removeTag(i)}
@@ -2411,7 +2463,7 @@ const RenameDocModal = ({ doc, text, onClose, onSave }: any) => {
     );
 };
 
-const TagDocModal = ({ doc, text, onClose, onAdd }: any) => {
+const TagDocModal = ({ doc, lang, text, onClose, onAdd }: any) => {
     const [tag, setTag] = useState('');
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -2424,16 +2476,16 @@ const TagDocModal = ({ doc, text, onClose, onAdd }: any) => {
                 <div className="space-y-4">
                     <div className="flex flex-wrap gap-2 mb-2">
                         {doc.tags.map((t: string, i: number) => (
-                            <span key={i} className="px-2 py-1 bg-neutral-800 text-white text-xs rounded border border-neutral-700">{t}</span>
+                            <span key={i} className="px-2 py-1 bg-neutral-800 text-white text-xs rounded border border-neutral-700">{translateTag(t, lang)}</span>
                         ))}
                     </div>
                     <div>
                         <label className="text-xs text-neutral-500 block mb-1.5">{text.tagName}</label>
-                        <input 
-                            type="text" 
-                            value={tag} 
+                        <input
+                            type="text"
+                            value={tag}
                             onChange={(e) => setTag(e.target.value)}
-                            placeholder="Urgent, Reviewed, etc."
+                            placeholder={lang === 'tr' ? 'Acil, İncelendi, vb.' : 'Urgent, Reviewed, etc.'}
                             className="w-full bg-[#0F0F0F] border border-neutral-700 rounded p-2 text-sm text-white focus:border-[#C1FF72] outline-none"
                         />
                     </div>
