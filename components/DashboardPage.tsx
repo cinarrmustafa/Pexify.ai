@@ -1665,6 +1665,7 @@ const StatusBadge = ({ status, textMap }: any) => {
 const AnalyticsView = ({ lang, currency }: { lang: 'en' | 'tr', currency: { code: string, symbol: string } }) => {
   const [timeRange, setTimeRange] = useState<'30d' | '3m' | '6m' | '1y' | 'all'>('30d');
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [chartViewMode, setChartViewMode] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1701,12 +1702,42 @@ const AnalyticsView = ({ lang, currency }: { lang: 'en' | 'tr', currency: { code
         missing: lang === 'tr' ? 'Eksik Alanlar' : 'Missing Fields',
         hsCode: lang === 'tr' ? 'GTİP Kodu Hatası' : 'HS Code Error'
     },
-    vsPrevious: lang === 'tr' ? 'önceki döneme göre' : 'vs previous period'
+    vsPrevious: lang === 'tr' ? 'önceki döneme göre' : 'vs previous period',
+    viewModes: {
+        daily: lang === 'tr' ? 'Günlük' : 'Daily',
+        weekly: lang === 'tr' ? 'Haftalık' : 'Weekly',
+        monthly: lang === 'tr' ? 'Aylık' : 'Monthly'
+    }
   };
 
   // Simulate data changing based on time range
   const multiplier = timeRange === '30d' ? 1 : timeRange === '3m' ? 3 : timeRange === '6m' ? 6 : timeRange === '1y' ? 12 : 24;
-  
+
+  // Chart data based on view mode
+  const getChartData = () => {
+    if (chartViewMode === 'daily') {
+      const dayLabels = lang === 'tr'
+        ? ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']
+        : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const dayData = [65, 80, 55, 90, 70, 45, 60];
+      return { labels: dayLabels, data: dayData };
+    } else if (chartViewMode === 'weekly') {
+      const weekLabels = lang === 'tr'
+        ? ['1. Hafta', '2. Hafta', '3. Hafta', '4. Hafta']
+        : ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+      const weekData = [70, 85, 65, 80];
+      return { labels: weekLabels, data: weekData };
+    } else {
+      const monthLabels = lang === 'tr'
+        ? ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
+        : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthData = [60, 70, 55, 80, 65, 75, 85, 70, 60, 75, 80, 90];
+      return { labels: monthLabels, data: monthData };
+    }
+  };
+
+  const chartData = getChartData();
+
   return (
     <div className="space-y-6">
         <div className="flex justify-between items-center">
@@ -1765,18 +1796,46 @@ const AnalyticsView = ({ lang, currency }: { lang: 'en' | 'tr', currency: { code
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-[#0A0A0A] border border-neutral-800 p-6 rounded-2xl min-h-[300px]">
-                <h4 className="text-white font-medium mb-6 flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4 text-[#C1FF72]" />
-                    {t.charts.volume}
-                </h4>
-                <div className="flex items-end justify-between h-48 gap-2">
-                    {[40, 65, 30, 80, 55, 90, 45, 70, 35, 60, 50, 75, 85, 40].map((h, i) => (
-                        <div key={i} className="w-full bg-neutral-800 rounded-t hover:bg-[#C1FF72] transition-colors relative group" style={{ height: `${h}%` }}>
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-neutral-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                {h * multiplier}
+                <div className="flex items-center justify-between mb-6">
+                    <h4 className="text-white font-medium flex items-center gap-2">
+                        <BarChart3 className="w-4 h-4 text-[#C1FF72]" />
+                        {t.charts.volume}
+                    </h4>
+                    <div className="flex gap-2">
+                        {(['daily', 'weekly', 'monthly'] as const).map((mode) => (
+                            <button
+                                key={mode}
+                                onClick={() => setChartViewMode(mode)}
+                                className={`px-3 py-1 text-xs rounded-lg transition-colors ${
+                                    chartViewMode === mode
+                                        ? 'bg-[#C1FF72] text-black font-medium'
+                                        : 'bg-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-700'
+                                }`}
+                            >
+                                {t.viewModes[mode]}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className="flex flex-col h-56">
+                    <div className="flex items-end justify-between flex-1 gap-2 px-1">
+                        {chartData.data.map((h, i) => (
+                            <div key={i} className="flex flex-col items-center flex-1 gap-2">
+                                <div className="w-full bg-neutral-800 rounded-t hover:bg-[#C1FF72] transition-colors relative group" style={{ height: `${h}%` }}>
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-neutral-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        {Math.round(h * multiplier * 1.5)} {lang === 'tr' ? 'belge' : 'docs'}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
+                    <div className="flex justify-between gap-2 mt-3 pt-3 border-t border-neutral-800 px-1">
+                        {chartData.labels.map((label, i) => (
+                            <div key={i} className="flex-1 text-center">
+                                <span className="text-[10px] text-neutral-500 font-medium">{label}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
             <div className="bg-[#0A0A0A] border border-neutral-800 p-6 rounded-2xl min-h-[300px]">
