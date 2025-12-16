@@ -26,8 +26,9 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
   
   // Data State
   const [companyType, setCompanyType] = useState('');
-  const [customCompanyType, setCustomCompanyType] = useState(''); // New state for 'Other' input
+  const [customCompanyType, setCustomCompanyType] = useState('');
   const [role, setRole] = useState('');
+  const [customRole, setCustomRole] = useState('');
   const [volume, setVolume] = useState('');
   const [challenge, setChallenge] = useState('');
   
@@ -79,6 +80,7 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
         companyType: "What is your company type?",
         specifyType: "Please specify your company type",
         role: "What is your primary role?",
+        specifyRole: "Please specify your role",
         volume: "Monthly Export Volume (Docs)",
         challenge: "Primary challenge?",
         details: "Contact Details",
@@ -93,7 +95,7 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
           "Consultancy / Brokerage",
           "Other"
         ],
-        roles: ["Export Manager", "Operations Director", "Business Owner", "IT / Tech Lead"],
+        roles: ["Export Manager", "Operations Director", "Business Owner", "IT / Tech Lead", "Other"],
         volumes: [
           "0–10 shipments",
           "10–50 shipments",
@@ -134,6 +136,7 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
         companyType: "Şirket türü?",
         specifyType: "Lütfen şirket türünü belirtiniz",
         role: "Göreviniz nedir?",
+        specifyRole: "Lütfen görevinizi belirtiniz",
         volume: "Aylık İhracat Hacmi (Belge Sayısı)",
         challenge: "En büyük zorluğunuz nedir?",
         details: "İletişim Bilgileri",
@@ -148,7 +151,7 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
           "Danışmanlık / Aracı",
           "Diğer"
         ],
-        roles: ["İhracat Müdürü", "Operasyon Direktörü", "Şirket Sahibi", "IT / Teknoloji Lideri"],
+        roles: ["İhracat Müdürü", "Operasyon Direktörü", "Şirket Sahibi", "IT / Teknoloji Lideri", "Diğer"],
         volumes: [
           "0–10 gönderi",
           "10–50 gönderi",
@@ -291,33 +294,67 @@ export const ScheduleDemoPage: React.FC<ScheduleDemoPageProps> = ({ lang, onBack
     );
   };
 
-  const renderRoleStep = () => (
-    <div className="w-full">
-      <div className="w-16 h-16 bg-neutral-900 rounded-2xl flex items-center justify-center mb-6 mx-auto border border-neutral-800">
-        <User className="w-8 h-8 text-[#C1FF72]" />
-      </div>
-      <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">{text.steps.role}</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {text.options.roles.map((r) => (
-          <button
-            key={r}
-            onClick={() => { setRole(r); goToStep('volume'); }}
-            className={`p-6 rounded-xl border text-left transition-all duration-300 group
-              ${role === r 
-                ? 'bg-[#C1FF72] border-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)]' 
-                : 'bg-[#0A0A0A] border-neutral-800 text-neutral-300 hover:border-neutral-600 hover:bg-neutral-900'}`}
-          >
-            <span className="font-medium text-lg block mb-1">{r}</span>
+  const renderRoleStep = () => {
+    const otherOptionString = text.options.roles[text.options.roles.length - 1];
+    const isOtherSelected = role === otherOptionString;
+
+    return (
+      <div className="w-full">
+        <div className="w-16 h-16 bg-neutral-900 rounded-2xl flex items-center justify-center mb-6 mx-auto border border-neutral-800">
+          <User className="w-8 h-8 text-[#C1FF72]" />
+        </div>
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">{text.steps.role}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {text.options.roles.map((r) => (
+            <button
+              key={r}
+              onClick={() => {
+                setRole(r);
+                if (r !== otherOptionString) {
+                  goToStep('volume');
+                }
+              }}
+              className={`p-6 rounded-xl border text-left transition-all duration-300 group
+                ${role === r
+                  ? 'bg-[#C1FF72] border-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)]'
+                  : 'bg-[#0A0A0A] border-neutral-800 text-neutral-300 hover:border-neutral-600 hover:bg-neutral-900'}`}
+            >
+              <span className="font-medium text-lg block mb-1">{r}</span>
+            </button>
+          ))}
+        </div>
+
+        {isOtherSelected && (
+           <div className="mt-6">
+              <label className="text-sm font-medium text-neutral-400 mb-2 block">{text.steps.specifyRole}</label>
+              <div className="flex gap-3 flex-col md:flex-row">
+                 <input
+                    type="text"
+                    value={customRole}
+                    onChange={(e) => setCustomRole(e.target.value)}
+                    placeholder={text.steps.specifyRole + "..."}
+                    className="flex-grow h-12 px-4 bg-[#0A0A0A] border border-neutral-800 rounded-xl text-white text-sm focus:border-[#C1FF72] outline-none transition-all"
+                    autoFocus
+                 />
+                 <Button
+                    onClick={() => goToStep('volume')}
+                    disabled={!customRole.trim()}
+                    className="md:w-auto w-full"
+                 >
+                    {text.next}
+                 </Button>
+              </div>
+           </div>
+        )}
+
+        <div className="mt-8 flex justify-center">
+          <button onClick={() => goBack('companyType')} className="text-neutral-500 hover:text-white flex items-center gap-2 text-sm">
+              <ArrowLeft className="w-4 h-4" /> {text.back}
           </button>
-        ))}
+        </div>
       </div>
-      <div className="mt-8 flex justify-center">
-        <button onClick={() => goBack('companyType')} className="text-neutral-500 hover:text-white flex items-center gap-2 text-sm">
-            <ArrowLeft className="w-4 h-4" /> {text.back}
-        </button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderVolumeStep = () => (
     <div className="w-full">
