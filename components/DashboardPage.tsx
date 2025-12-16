@@ -2346,61 +2346,373 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
 };
 
 const UpgradeView = ({ lang, text, currentPlanId, onPlanSelect }: { lang: 'en' | 'tr', text: any, currentPlanId: PlanType, onPlanSelect: (p: PlanType) => void }) => {
+  const [selectedPlanForDetails, setSelectedPlanForDetails] = useState<PlanType | null>(null);
+
+  const detailsText = {
+    en: {
+      viewDetails: "View Details",
+      planDetails: "Plan Details",
+      whatsIncluded: "What's Included",
+      limits: "Limits & Usage",
+      support: "Support",
+      integration: "Integration",
+      security: "Security",
+      close: "Close"
+    },
+    tr: {
+      viewDetails: "Detayları Gör",
+      planDetails: "Plan Detayları",
+      whatsIncluded: "Dahil Olanlar",
+      limits: "Limitler & Kullanım",
+      support: "Destek",
+      integration: "Entegrasyon",
+      security: "Güvenlik",
+      close: "Kapat"
+    }
+  };
+
+  const t = detailsText[lang];
+
+  const planDetails = {
+    Starter: {
+      limits: lang === 'tr' ? [
+        "Ayda 500 belge işleme",
+        "Maksimum 25MB dosya boyutu",
+        "1 aktif kullanıcı",
+        "30 gün veri saklama"
+      ] : [
+        "500 documents per month",
+        "Maximum 25MB file size",
+        "1 active user",
+        "30 days data retention"
+      ],
+      support: lang === 'tr' ? [
+        "E-posta desteği (48 saat)",
+        "Dokümantasyon erişimi",
+        "Topluluk forumu"
+      ] : [
+        "Email support (48 hours)",
+        "Documentation access",
+        "Community forum"
+      ],
+      integration: lang === 'tr' ? [
+        "Temel API erişimi",
+        "Webhook desteği",
+        "CSV/Excel dışa aktarma"
+      ] : [
+        "Basic API access",
+        "Webhook support",
+        "CSV/Excel export"
+      ],
+      security: lang === 'tr' ? [
+        "SSL şifreleme",
+        "İki faktörlü kimlik doğrulama",
+        "Temel güvenlik raporları"
+      ] : [
+        "SSL encryption",
+        "Two-factor authentication",
+        "Basic security reports"
+      ]
+    },
+    Growth: {
+      limits: lang === 'tr' ? [
+        "Ayda 2,500 belge işleme",
+        "Maksimum 100MB dosya boyutu",
+        "5 aktif kullanıcı",
+        "1 yıl veri saklama",
+        "Öncelikli işleme kuyruğu"
+      ] : [
+        "2,500 documents per month",
+        "Maximum 100MB file size",
+        "5 active users",
+        "1 year data retention",
+        "Priority processing queue"
+      ],
+      support: lang === 'tr' ? [
+        "Öncelikli e-posta desteği (24 saat)",
+        "Canlı sohbet desteği",
+        "Video eğitim materyalleri",
+        "Özel onboarding"
+      ] : [
+        "Priority email support (24 hours)",
+        "Live chat support",
+        "Video training materials",
+        "Custom onboarding"
+      ],
+      integration: lang === 'tr' ? [
+        "Gelişmiş API erişimi",
+        "ERP sistemleri entegrasyonu",
+        "Özel webhook'lar",
+        "Otomatik veri senkronizasyonu",
+        "REST API & GraphQL"
+      ] : [
+        "Advanced API access",
+        "ERP system integration",
+        "Custom webhooks",
+        "Automatic data sync",
+        "REST API & GraphQL"
+      ],
+      security: lang === 'tr' ? [
+        "SSL/TLS şifreleme",
+        "İki faktörlü kimlik doğrulama",
+        "Gelişmiş güvenlik raporları",
+        "Denetim günlükleri",
+        "IP kısıtlamaları"
+      ] : [
+        "SSL/TLS encryption",
+        "Two-factor authentication",
+        "Advanced security reports",
+        "Audit logs",
+        "IP restrictions"
+      ]
+    },
+    Enterprise: {
+      limits: lang === 'tr' ? [
+        "Sınırsız belge işleme",
+        "Özel dosya boyutu limiti",
+        "Sınırsız kullanıcı",
+        "Özel veri saklama süresi",
+        "Özel sunucu kaynakları"
+      ] : [
+        "Unlimited documents",
+        "Custom file size limit",
+        "Unlimited users",
+        "Custom data retention",
+        "Dedicated server resources"
+      ],
+      support: lang === 'tr' ? [
+        "7/24 özel destek ekibi",
+        "Özel hesap yöneticisi",
+        "Telefon desteği",
+        "Yerinde eğitim",
+        "SLA garantisi (99.9%)",
+        "Acil müdahale hattı"
+      ] : [
+        "24/7 dedicated support team",
+        "Dedicated account manager",
+        "Phone support",
+        "On-site training",
+        "SLA guarantee (99.9%)",
+        "Emergency hotline"
+      ],
+      integration: lang === 'tr' ? [
+        "Özel API geliştirme",
+        "Tüm ERP sistemleri",
+        "Özel entegrasyon desteği",
+        "SSO entegrasyonu",
+        "LDAP/Active Directory",
+        "Yerinde kurulum seçeneği"
+      ] : [
+        "Custom API development",
+        "All ERP systems",
+        "Custom integration support",
+        "SSO integration",
+        "LDAP/Active Directory",
+        "On-premise deployment option"
+      ],
+      security: lang === 'tr' ? [
+        "SOC2 Type II uyumluluğu",
+        "GDPR uyumluluğu",
+        "ISO 27001 sertifikası",
+        "Özel güvenlik denetimleri",
+        "Gelişmiş denetim günlükleri",
+        "Veri yerleşimi kontrolü",
+        "Özel güvenlik politikaları"
+      ] : [
+        "SOC2 Type II compliance",
+        "GDPR compliance",
+        "ISO 27001 certified",
+        "Custom security audits",
+        "Advanced audit logs",
+        "Data residency control",
+        "Custom security policies"
+      ]
+    }
+  };
+
   return (
-    <div className="max-w-6xl mx-auto space-y-12 pb-12">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold text-white mb-3">{text.title}</h2>
-        <p className="text-neutral-400">{text.subtitle}</p>
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-8">
-        {text.tiers.map((tier: any, i: number) => {
-            const planKey = ['Starter', 'Growth', 'Enterprise'][i] as PlanType;
-            const isCurrent = planKey === currentPlanId;
-            return (
-                <div key={i} className={`relative p-8 rounded-3xl border flex flex-col h-full transition-all duration-300 ${isCurrent ? 'bg-neutral-900/50 border-[#C1FF72] shadow-[0_0_30px_rgba(193,255,114,0.1)]' : 'bg-[#0A0A0A] border-neutral-800 hover:border-neutral-700'}`}>
-                    {isCurrent && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#C1FF72] text-black text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                        {text.current}
-                    </div>
-                    )}
-                    <div className="mb-8">
-                    <h3 className="text-lg font-medium text-white mb-2">{tier.name}</h3>
-                    <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-bold text-white">{tier.price}</span>
-                        <span className="text-neutral-500">{tier.period}</span>
-                    </div>
-                    </div>
-                    <ul className="space-y-4 mb-8 flex-grow">
-                    {tier.features.map((feature: string, j: number) => (
-                        <li key={j} className="flex items-start text-sm text-neutral-300">
-                        <Check className="w-4 h-4 mr-3 mt-0.5 text-[#C1FF72]" />
-                        {feature}
-                        </li>
-                    ))}
-                    </ul>
-                    <Button 
-                        variant={isCurrent ? 'outline' : 'primary'} 
-                        className="w-full"
-                        onClick={() => !isCurrent && onPlanSelect(planKey)}
-                        disabled={isCurrent}
-                    >
-                        {isCurrent ? text.current : tier.price === 'Custom' || tier.price === 'Özel' ? text.contact : text.switch}
-                    </Button>
-                </div>
-            );
-        })}
-      </div>
-
-      <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-8">
-        <div>
-            <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                <ShieldCheck className="w-6 h-6 text-[#C1FF72]" />
-                {text.security.title}
-            </h3>
-            <p className="text-neutral-400 max-w-2xl">{text.security.desc}</p>
+    <>
+      <div className="max-w-6xl mx-auto space-y-12 pb-12">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-white mb-3">{text.title}</h2>
+          <p className="text-neutral-400">{text.subtitle}</p>
         </div>
-        <Button variant="outline">{text.security.btn}</Button>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {text.tiers.map((tier: any, i: number) => {
+              const planKey = ['Starter', 'Growth', 'Enterprise'][i] as PlanType;
+              const isCurrent = planKey === currentPlanId;
+              return (
+                  <div key={i} className={`relative p-8 rounded-3xl border flex flex-col h-full transition-all duration-300 ${isCurrent ? 'bg-neutral-900/50 border-[#C1FF72] shadow-[0_0_30px_rgba(193,255,114,0.1)]' : 'bg-[#0A0A0A] border-neutral-800 hover:border-neutral-700'}`}>
+                      {isCurrent && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#C1FF72] text-black text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                          {text.current}
+                      </div>
+                      )}
+                      <div className="mb-8">
+                      <h3 className="text-lg font-medium text-white mb-2">{tier.name}</h3>
+                      <div className="flex items-baseline gap-1">
+                          <span className="text-4xl font-bold text-white">{tier.price}</span>
+                          <span className="text-neutral-500">{tier.period}</span>
+                      </div>
+                      </div>
+                      <ul className="space-y-4 mb-8 flex-grow">
+                      {tier.features.map((feature: string, j: number) => (
+                          <li key={j} className="flex items-start text-sm text-neutral-300">
+                          <Check className="w-4 h-4 mr-3 mt-0.5 text-[#C1FF72]" />
+                          {feature}
+                          </li>
+                      ))}
+                      </ul>
+                      <div className="space-y-3">
+                        <Button
+                            variant={isCurrent ? 'outline' : 'primary'}
+                            className="w-full"
+                            onClick={() => !isCurrent && onPlanSelect(planKey)}
+                            disabled={isCurrent}
+                        >
+                            {isCurrent ? text.current : tier.price === 'Custom' || tier.price === 'Özel' ? text.contact : text.switch}
+                        </Button>
+                        <button
+                          onClick={() => setSelectedPlanForDetails(planKey)}
+                          className="w-full py-2.5 text-sm text-neutral-400 hover:text-[#C1FF72] transition-colors border border-neutral-800 hover:border-[#C1FF72]/30 rounded-xl font-medium"
+                        >
+                          {t.viewDetails}
+                        </button>
+                      </div>
+                  </div>
+              );
+          })}
+        </div>
+
+        <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div>
+              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                  <ShieldCheck className="w-6 h-6 text-[#C1FF72]" />
+                  {text.security.title}
+              </h3>
+              <p className="text-neutral-400 max-w-2xl">{text.security.desc}</p>
+          </div>
+          <Button variant="outline">{text.security.btn}</Button>
+        </div>
+      </div>
+
+      {selectedPlanForDetails && (
+        <PlanDetailsModal
+          lang={lang}
+          planName={text.tiers[['Starter', 'Growth', 'Enterprise'].indexOf(selectedPlanForDetails)].name}
+          planKey={selectedPlanForDetails}
+          details={planDetails[selectedPlanForDetails]}
+          text={t}
+          onClose={() => setSelectedPlanForDetails(null)}
+        />
+      )}
+    </>
+  );
+};
+
+const PlanDetailsModal = ({ lang, planName, planKey, details, text, onClose }: {
+  lang: 'en' | 'tr',
+  planName: string,
+  planKey: PlanType,
+  details: any,
+  text: any,
+  onClose: () => void
+}) => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose}></div>
+      <div className="bg-[#0F0F0F] border border-neutral-800 rounded-3xl w-full max-w-4xl relative z-10 shadow-2xl animate-in fade-in zoom-in-95 duration-300 overflow-hidden max-h-[90vh] flex flex-col">
+        <div className="p-6 border-b border-neutral-800 flex items-center justify-between bg-gradient-to-r from-[#0F0F0F] to-[#1A1A1A]">
+          <div>
+            <h3 className="text-2xl font-bold text-white mb-1">{planName}</h3>
+            <p className="text-sm text-neutral-400">{text.planDetails}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-neutral-500 hover:text-white transition-colors p-2 hover:bg-neutral-800 rounded-lg"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-6 hover:border-[#C1FF72]/30 transition-all">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[#C1FF72]/10 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-[#C1FF72]" />
+                </div>
+                <h4 className="text-lg font-semibold text-white">{text.limits}</h4>
+              </div>
+              <ul className="space-y-3">
+                {details.limits.map((item: string, i: number) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
+                    <Check className="w-4 h-4 mt-0.5 text-[#C1FF72] shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-6 hover:border-[#C1FF72]/30 transition-all">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[#C1FF72]/10 flex items-center justify-center">
+                  <User className="w-5 h-5 text-[#C1FF72]" />
+                </div>
+                <h4 className="text-lg font-semibold text-white">{text.support}</h4>
+              </div>
+              <ul className="space-y-3">
+                {details.support.map((item: string, i: number) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
+                    <Check className="w-4 h-4 mt-0.5 text-[#C1FF72] shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-6 hover:border-[#C1FF72]/30 transition-all">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[#C1FF72]/10 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-[#C1FF72]" />
+                </div>
+                <h4 className="text-lg font-semibold text-white">{text.integration}</h4>
+              </div>
+              <ul className="space-y-3">
+                {details.integration.map((item: string, i: number) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
+                    <Check className="w-4 h-4 mt-0.5 text-[#C1FF72] shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-6 hover:border-[#C1FF72]/30 transition-all">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[#C1FF72]/10 flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5 text-[#C1FF72]" />
+                </div>
+                <h4 className="text-lg font-semibold text-white">{text.security}</h4>
+              </div>
+              <ul className="space-y-3">
+                {details.security.map((item: string, i: number) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
+                    <Check className="w-4 h-4 mt-0.5 text-[#C1FF72] shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 border-t border-neutral-800 bg-[#0A0A0A]">
+          <Button onClick={onClose} className="w-full md:w-auto md:ml-auto flex">
+            {text.close}
+          </Button>
+        </div>
       </div>
     </div>
   );
