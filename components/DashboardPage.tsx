@@ -197,7 +197,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
   const [searchQuery, setSearchQuery] = useState('');
   const [userPlan, setUserPlan] = useState<PlanType>('Growth');
   const notificationRef = useRef<HTMLDivElement>(null);
-  const notificationTimeouts = useRef<Map<number, NodeJS.Timeout>>(new Map());
+  const notificationTimeouts = useRef<Record<number, NodeJS.Timeout>>({});
 
   // Lifted Notification State
   const [notificationSettings, setNotificationSettings] = useState({
@@ -593,23 +593,23 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
           const newIsRead = !notif.isRead;
 
           if (newIsRead) {
-            const existingTimeout = notificationTimeouts.current.get(notifId);
+            const existingTimeout = notificationTimeouts.current[notifId];
             if (existingTimeout) {
               clearTimeout(existingTimeout);
             }
 
             const timeout = setTimeout(() => {
               setNotifications(prev => prev.filter(n => n.id !== notifId));
-              notificationTimeouts.current.delete(notifId);
+              delete notificationTimeouts.current[notifId];
             }, 1500);
 
-            notificationTimeouts.current.set(notifId, timeout);
+            notificationTimeouts.current[notifId] = timeout;
             return { ...notif, isRead: true, dismissing: true };
           } else {
-            const existingTimeout = notificationTimeouts.current.get(notifId);
+            const existingTimeout = notificationTimeouts.current[notifId];
             if (existingTimeout) {
               clearTimeout(existingTimeout);
-              notificationTimeouts.current.delete(notifId);
+              delete notificationTimeouts.current[notifId];
             }
             return { ...notif, isRead: false, dismissing: false };
           }
@@ -620,8 +620,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
   };
 
   const handleMarkAllRead = () => {
-    notificationTimeouts.current.forEach(timeout => clearTimeout(timeout));
-    notificationTimeouts.current.clear();
+    Object.values(notificationTimeouts.current).forEach(timeout => clearTimeout(timeout));
+    notificationTimeouts.current = {};
     setNotifications([]);
   };
 
