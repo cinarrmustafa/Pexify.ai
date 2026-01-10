@@ -29,21 +29,7 @@ type PlanType = 'Starter' | 'Growth' | 'Enterprise';
 type ModalActionType = 'view' | 'rename' | 'tag' | null;
 
 // Initial Mock Data
-const initialDocs: Doc[] = [
-  { id: 1, name: "INV-2024-001.pdf", date: "Mar 12, 2024", type: "Invoice", size: "2.4 MB", status: "verified", issues: 0, tags: ["Urgent"] },
-  { id: 2, name: "PL-2024-003-US.pdf", date: "Mar 11, 2024", type: "Packing List", size: "1.1 MB", status: "risk", issues: 3, tags: [] },
-  { id: 3, name: "BL-DRAFT-V2.pdf", date: "Mar 10, 2024", type: "Bill of Lading", size: "3.5 MB", status: "verified", issues: 0, tags: ["Reviewed"] },
-  { id: 4, name: "EUR1-CERT-GER.jpg", date: "Mar 09, 2024", type: "Certificate", size: "0.8 MB", status: "processing", issues: null, tags: [] },
-  { id: 5, name: "COMM-INV-002.pdf", date: "Mar 08, 2024", type: "Invoice", size: "1.9 MB", status: "verified", issues: 0, tags: [] },
-  { id: 6, name: "PL-FINAL-V3.pdf", date: "Mar 08, 2024", type: "Packing List", size: "1.2 MB", status: "verified", issues: 0, tags: [] },
-  { id: 7, name: "WEIGHT-NOTE-001.pdf", date: "Mar 07, 2024", type: "Weight Note", size: "0.5 MB", status: "risk", issues: 1, tags: [] },
-  // Adding more mock data to demonstrate pagination
-  { id: 8, name: "INV-2024-004.pdf", date: "Mar 06, 2024", type: "Invoice", size: "2.1 MB", status: "verified", issues: 0, tags: [] },
-  { id: 9, name: "PL-2024-005.pdf", date: "Mar 05, 2024", type: "Packing List", size: "1.3 MB", status: "verified", issues: 0, tags: [] },
-  { id: 10, name: "BL-FINAL.pdf", date: "Mar 04, 2024", type: "Bill of Lading", size: "3.1 MB", status: "verified", issues: 0, tags: [] },
-  { id: 11, name: "CERT-ORIGIN.pdf", date: "Mar 03, 2024", type: "Certificate", size: "0.9 MB", status: "verified", issues: 0, tags: [] },
-  { id: 12, name: "INV-2024-006.pdf", date: "Mar 02, 2024", type: "Invoice", size: "2.5 MB", status: "risk", issues: 2, tags: [] },
-];
+const initialDocs: Doc[] = [];
 
 const getDocTypeTranslation = (type: string, lang: 'en' | 'tr') => {
   const map: Record<string, string> = lang === 'tr' ? {
@@ -467,6 +453,47 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Load user documents from database
+  useEffect(() => {
+    const loadUserDocuments = async () => {
+      if (!user) {
+        setAllDocs([]);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('documents')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error loading documents:', error);
+          return;
+        }
+
+        if (data) {
+          const formattedDocs: Doc[] = data.map((doc: any) => ({
+            id: doc.id,
+            name: doc.file_name || doc.name,
+            date: new Date(doc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            type: doc.type,
+            size: doc.size,
+            status: doc.status as 'verified' | 'risk' | 'processing' | 'queued',
+            issues: doc.status === 'risk' ? 3 : 0,
+            tags: doc.tags || [],
+            filePath: doc.file_path
+          }));
+          setAllDocs(formattedDocs);
+        }
+      } catch (error) {
+        console.error('Error loading documents:', error);
+      }
+    };
+
+    loadUserDocuments();
+  }, [user]);
+
   // Filter documents based on search query
   const filteredDocs = allDocs.filter(doc => 
     doc.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -505,13 +532,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
         else if (lowerName.includes('cert') || lowerName.includes('sertifika')) detectedType = 'Certificate';
         else if (lowerName.includes('weight') || lowerName.includes('ağırlık')) detectedType = 'Weight Note';
 
+        const formattedSize = (file.size / 1024 / 1024).toFixed(2) + " MB";
+        const currentDate = new Date().toISOString().split('T')[0];
+
         const { data: dbData, error: dbError } = await supabase
-          .from('user_documents')
+          .from('documents')
           .insert({
             user_id: uid,
             file_path: storagePath,
             file_name: file.name,
-            analysis_status: 'pending'
+            name: file.name,
+            type: detectedType,
+            date: currentDate,
+            size: formattedSize,
+            status: 'queued',
+            tags: []
           })
           .select()
           .single();
@@ -527,7 +562,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
           name: file.name,
           date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
           type: detectedType,
-          size: (file.size / 1024 / 1024).toFixed(2) + " MB",
+          size: formattedSize,
           status: "queued" as const,
           issues: null,
           tags: [],
@@ -2496,7 +2531,7 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
                         if (!user) return;
                         try {
                             const { data, error } = await supabase
-                                .from('user_documents')
+                                .from('documents')
                                 .select('*')
                                 .limit(10);
 
