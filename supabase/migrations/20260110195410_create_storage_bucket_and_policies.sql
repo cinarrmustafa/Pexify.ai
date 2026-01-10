@@ -2,7 +2,7 @@
   # Create Storage Bucket and RLS Policies
 
   1. Storage Bucket
-    - Name: `secure-docs`
+    - Name: `documents`
     - Public: false (private bucket)
     - File size limit: 50MB
     - Allowed MIME types: PDF, images, documents
@@ -27,8 +27,8 @@
 -- Create storage bucket (if not exists)
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
-  'secure-docs',
-  'secure-docs',
+  'documents',
+  'documents',
   false,
   52428800,
   ARRAY['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword', 'text/plain']
@@ -36,51 +36,51 @@ VALUES (
 ON CONFLICT (id) DO NOTHING;
 
 -- Drop existing storage policies if they exist (for idempotency)
-DROP POLICY IF EXISTS "secure_docs_select_own" ON storage.objects;
-DROP POLICY IF EXISTS "secure_docs_insert_own" ON storage.objects;
-DROP POLICY IF EXISTS "secure_docs_update_own" ON storage.objects;
-DROP POLICY IF EXISTS "secure_docs_delete_own" ON storage.objects;
+DROP POLICY IF EXISTS "documents_select_own" ON storage.objects;
+DROP POLICY IF EXISTS "documents_insert_own" ON storage.objects;
+DROP POLICY IF EXISTS "documents_update_own" ON storage.objects;
+DROP POLICY IF EXISTS "documents_delete_own" ON storage.objects;
 
 -- SELECT: Users can only read/download their own files
-CREATE POLICY "secure_docs_select_own"
+CREATE POLICY "documents_select_own"
   ON storage.objects
   FOR SELECT
   TO authenticated
   USING (
-    bucket_id = 'secure-docs' 
+    bucket_id = 'documents'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
 -- INSERT: Users can only upload to their own folder
-CREATE POLICY "secure_docs_insert_own"
+CREATE POLICY "documents_insert_own"
   ON storage.objects
   FOR INSERT
   TO authenticated
   WITH CHECK (
-    bucket_id = 'secure-docs' 
+    bucket_id = 'documents'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
 -- UPDATE: Users can only update/move their own files
-CREATE POLICY "secure_docs_update_own"
+CREATE POLICY "documents_update_own"
   ON storage.objects
   FOR UPDATE
   TO authenticated
   USING (
-    bucket_id = 'secure-docs' 
+    bucket_id = 'documents'
     AND (storage.foldername(name))[1] = auth.uid()::text
   )
   WITH CHECK (
-    bucket_id = 'secure-docs' 
+    bucket_id = 'documents'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
 -- DELETE: Users can only delete their own files
-CREATE POLICY "secure_docs_delete_own"
+CREATE POLICY "documents_delete_own"
   ON storage.objects
   FOR DELETE
   TO authenticated
   USING (
-    bucket_id = 'secure-docs' 
+    bucket_id = 'documents'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );

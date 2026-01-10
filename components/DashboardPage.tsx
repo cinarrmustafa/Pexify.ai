@@ -4,6 +4,7 @@ import { LayoutDashboard, FileText, CloudUpload as UploadCloud, History, Setting
 import { Button } from './Button';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { DOCUMENTS_BUCKET } from '../lib/constants';
 
 interface DashboardPageProps {
   lang: 'en' | 'tr';
@@ -515,7 +516,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
         const storagePath = `${uid}/${fileName}`;
 
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('secure-docs')
+          .from(DOCUMENTS_BUCKET)
           .upload(storagePath, file);
 
         if (uploadError) {
@@ -552,7 +553,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
 
         if (dbError) {
           console.error('Database error:', dbError);
-          await supabase.storage.from('secure-docs').remove([storagePath]);
+          await supabase.storage.from(DOCUMENTS_BUCKET).remove([storagePath]);
           throw dbError;
         }
 
@@ -1078,7 +1079,7 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose, onUpdate }: { doc: 
 
       try {
         const { data, error } = await supabase.storage
-          .from('secure-docs')
+          .from(DOCUMENTS_BUCKET)
           .createSignedUrl(doc.filePath, 300);
 
         if (error || !data?.signedUrl) {
@@ -2503,7 +2504,7 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
                             const testPath = `someone-else-uid/test-unauthorized.txt`;
                             const blob = new Blob(['test'], { type: 'text/plain' });
                             const { error } = await supabase.storage
-                                .from('secure-docs')
+                                .from(DOCUMENTS_BUCKET)
                                 .upload(testPath, blob);
 
                             if (error) {

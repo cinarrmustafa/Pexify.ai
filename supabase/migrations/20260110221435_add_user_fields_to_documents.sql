@@ -3,7 +3,7 @@
 
   1. Changes
     - Add `user_id` (uuid, foreign key) - References auth.users(id), links document to owner
-    - Add `file_path` (text) - Storage path in secure-docs bucket
+    - Add `file_path` (text) - Storage path in documents bucket
     - Add `file_name` (text) - Original file name for display and download
     
   2. Security Updates
