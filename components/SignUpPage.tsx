@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Mail, Lock, User, Building, Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { Button } from './Button';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SignUpPageProps {
   lang: 'en' | 'tr';
@@ -12,8 +13,14 @@ interface SignUpPageProps {
 }
 
 export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginClick, onSignupSuccess, selectedPlan }) => {
+  const { signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [company, setCompany] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -60,14 +67,23 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginCli
 
   const text = t[lang];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-        setIsLoading(false);
-        if (onSignupSuccess) onSignupSuccess();
-    }, 2000);
+    setError('');
+
+    const { error } = await signUp(email, password, {
+      full_name: fullName,
+      company: company
+    });
+
+    if (error) {
+      setError(error.message);
+      setIsLoading(false);
+    } else {
+      setIsLoading(false);
+      if (onSignupSuccess) onSignupSuccess();
+    }
   };
 
   return (
@@ -120,14 +136,22 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginCli
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
+                  {error}
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                     <label className="text-sm font-medium text-neutral-300 flex items-center gap-2">
                     <User className="w-3.5 h-3.5 text-[#C1FF72]" />
                     {text.nameLabel}
                     </label>
-                    <input 
-                    type="text" 
+                    <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                     placeholder={text.namePlaceholder}
                     className="w-full h-12 px-4 bg-[#0F0F0F] border border-neutral-800 rounded-xl text-white text-sm placeholder-neutral-600 focus:border-[#C1FF72] focus:ring-1 focus:ring-[#C1FF72] outline-none transition-all"
                     required
@@ -138,8 +162,10 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginCli
                     <Building className="w-3.5 h-3.5 text-[#C1FF72]" />
                     {text.companyLabel}
                     </label>
-                    <input 
-                    type="text" 
+                    <input
+                    type="text"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
                     placeholder={text.companyPlaceholder}
                     className="w-full h-12 px-4 bg-[#0F0F0F] border border-neutral-800 rounded-xl text-white text-sm placeholder-neutral-600 focus:border-[#C1FF72] focus:ring-1 focus:ring-[#C1FF72] outline-none transition-all"
                     />
@@ -151,8 +177,10 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginCli
                   <Mail className="w-3.5 h-3.5 text-[#C1FF72]" />
                   {text.emailLabel}
                 </label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder={text.emailPlaceholder}
                   className="w-full h-12 px-4 bg-[#0F0F0F] border border-neutral-800 rounded-xl text-white text-sm placeholder-neutral-600 focus:border-[#C1FF72] focus:ring-1 focus:ring-[#C1FF72] outline-none transition-all"
                   required
@@ -165,8 +193,10 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({ lang, onBack, onLoginCli
                   {text.passLabel}
                 </label>
                 <div className="relative">
-                  <input 
+                  <input
                     type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder={text.passPlaceholder}
                     className="w-full h-12 px-4 bg-[#0F0F0F] border border-neutral-800 rounded-xl text-white text-sm placeholder-neutral-600 focus:border-[#C1FF72] focus:ring-1 focus:ring-[#C1FF72] outline-none transition-all pr-10"
                     required

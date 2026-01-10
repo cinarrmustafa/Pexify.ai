@@ -3,6 +3,7 @@ import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
 import { LayoutDashboard, FileText, CloudUpload as UploadCloud, History, Settings, LogOut, Bell, Search, Plus, MoveVertical as MoreVertical, CircleCheck as CheckCircle2, TriangleAlert as AlertTriangle, Clock, ChartBar as FileBarChart, ListFilter as Filter, Download, Trash2, Eye, Globe, ChartBar as BarChart3, ChartPie as PieChart, TrendingUp, Map, Calendar, User, CreditCard, Lock, Mail, Save, ToggleLeft, ToggleRight, X, File, Layers, Check, ArrowRight, Zap, ShieldCheck, ArrowUpDown, ArrowUp, ArrowDown, CreditCard as Edit, Tag, ChevronDown, Loader as Loader2 } from 'lucide-react';
 import { Button } from './Button';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 interface DashboardPageProps {
   lang: 'en' | 'tr';
@@ -137,6 +138,7 @@ const getMockNotifications = (lang: 'en' | 'tr') => {
 };
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, setLang }) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -470,37 +472,82 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
     doc.type.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleFileUpload = (files: File[]) => {
-    const newDocs: Doc[] = files.map((file, i) => {
-      // Auto-detect type based on filename
-      const lowerName = file.name.toLowerCase();
-      let detectedType = 'Other';
-      
-      if (lowerName.includes('inv') || lowerName.includes('fatura')) detectedType = 'Invoice';
-      else if (lowerName.includes('pl') || lowerName.includes('pack') || lowerName.includes('çeki')) detectedType = 'Packing List';
-      else if (lowerName.includes('bl') || lowerName.includes('bill') || lowerName.includes('konşimento')) detectedType = 'Bill of Lading';
-      else if (lowerName.includes('cert') || lowerName.includes('sertifika')) detectedType = 'Certificate';
-      else if (lowerName.includes('weight') || lowerName.includes('ağırlık')) detectedType = 'Weight Note';
+  const handleFileUpload = async (files: File[]) => {
+    if (!user) {
+      alert('You must be logged in to upload files');
+      return;
+    }
 
-      // Create a blob URL for preview
-      const fileUrl = URL.createObjectURL(file);
+    const uploadPromises = files.map(async (file, i) => {
+      try {
+        const uid = user.id;
+        const uniqueId = crypto.randomUUID();
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${uniqueId}-${file.name}`;
+        const storagePath = `${uid}/${fileName}`;
 
-      return {
-        id: Date.now() + i,
-        name: file.name,
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        type: detectedType, 
-        size: (file.size / 1024 / 1024).toFixed(2) + " MB",
-        status: "queued", 
-        issues: null,
-        tags: [],
-        fileUrl: fileUrl // Store the URL
-      };
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('secure-docs')
+          .upload(storagePath, file);
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw uploadError;
+        }
+
+        const lowerName = file.name.toLowerCase();
+        let detectedType = 'Other';
+
+        if (lowerName.includes('inv') || lowerName.includes('fatura')) detectedType = 'Invoice';
+        else if (lowerName.includes('pl') || lowerName.includes('pack') || lowerName.includes('çeki')) detectedType = 'Packing List';
+        else if (lowerName.includes('bl') || lowerName.includes('bill') || lowerName.includes('konşimento')) detectedType = 'Bill of Lading';
+        else if (lowerName.includes('cert') || lowerName.includes('sertifika')) detectedType = 'Certificate';
+        else if (lowerName.includes('weight') || lowerName.includes('ağırlık')) detectedType = 'Weight Note';
+
+        const { data: dbData, error: dbError } = await supabase
+          .from('user_documents')
+          .insert({
+            user_id: uid,
+            file_path: storagePath,
+            file_name: file.name,
+            analysis_status: 'pending'
+          })
+          .select()
+          .single();
+
+        if (dbError) {
+          console.error('Database error:', dbError);
+          await supabase.storage.from('secure-docs').remove([storagePath]);
+          throw dbError;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('secure-docs')
+          .getPublicUrl(storagePath);
+
+        return {
+          id: dbData.id,
+          name: file.name,
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          type: detectedType,
+          size: (file.size / 1024 / 1024).toFixed(2) + " MB",
+          status: "queued" as const,
+          issues: null,
+          tags: [],
+          fileUrl: publicUrl
+        };
+      } catch (error) {
+        console.error('Error uploading file:', file.name, error);
+        return null;
+      }
     });
 
-    setAllDocs(prev => [...newDocs, ...prev]);
-    // Force switch to dashboard view to show the queue/analysis staging area
-    setActiveTab('dashboard');
+    const uploadedDocs = (await Promise.all(uploadPromises)).filter(doc => doc !== null) as Doc[];
+
+    if (uploadedDocs.length > 0) {
+      setAllDocs(prev => [...uploadedDocs, ...prev]);
+      setActiveTab('dashboard');
+    }
   };
 
   const handleDeleteDoc = (id: number) => {
@@ -2289,6 +2336,89 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
                         </option>
                     ))}
                 </select>
+            </div>
+        </div>
+
+        {/* Dev Test */}
+        <div className="bg-[#0A0A0A] border border-neutral-800 rounded-2xl p-8">
+            <h3 className="text-lg font-semibold text-white mb-1">{lang === 'tr' ? 'Geliştirici Testi' : 'Dev Test'}</h3>
+            <p className="text-sm text-neutral-500 mb-8">
+                {lang === 'tr'
+                    ? 'RLS ve Storage güvenliği test fonksiyonları.'
+                    : 'RLS and Storage security test functions.'}
+            </p>
+
+            <div className="space-y-4">
+                <button
+                    onClick={async () => {
+                        if (!user) {
+                            alert('Not logged in');
+                            return;
+                        }
+                        try {
+                            const testPath = `someone-else-uid/test-unauthorized.txt`;
+                            const blob = new Blob(['test'], { type: 'text/plain' });
+                            const { error } = await supabase.storage
+                                .from('secure-docs')
+                                .upload(testPath, blob);
+
+                            if (error) {
+                                alert(`✅ PASS: Upload to another user's folder blocked: ${error.message}`);
+                            } else {
+                                alert('❌ FAIL: Was able to upload to another user folder!');
+                            }
+                        } catch (e: any) {
+                            alert(`✅ PASS: Upload blocked with exception: ${e.message}`);
+                        }
+                    }}
+                    className="w-full px-4 py-3 border border-neutral-700 rounded-lg text-sm text-white hover:border-[#C1FF72] hover:text-[#C1FF72] transition-colors text-left"
+                >
+                    {lang === 'tr' ? '1. Başka kullanıcı klasörüne yazma testi (403 bekleniyor)' : '1. Test upload to another user folder (expect 403)'}
+                </button>
+
+                <button
+                    onClick={async () => {
+                        if (!user) {
+                            alert('Not logged in');
+                            return;
+                        }
+                        try {
+                            const { data, error } = await supabase
+                                .from('user_documents')
+                                .select('*')
+                                .limit(10);
+
+                            if (error) {
+                                alert(`❌ FAIL: Could not fetch documents: ${error.message}`);
+                            } else {
+                                const allOwnedByMe = data.every(doc => doc.user_id === user.id);
+                                if (allOwnedByMe) {
+                                    alert(`✅ PASS: All ${data.length} documents belong to current user`);
+                                } else {
+                                    alert(`❌ FAIL: Some documents belong to other users!`);
+                                }
+                            }
+                        } catch (e: any) {
+                            alert(`❌ FAIL: ${e.message}`);
+                        }
+                    }}
+                    className="w-full px-4 py-3 border border-neutral-700 rounded-lg text-sm text-white hover:border-[#C1FF72] hover:text-[#C1FF72] transition-colors text-left"
+                >
+                    {lang === 'tr' ? '2. Sadece kendi belgelerini görme testi' : '2. Test list only own documents'}
+                </button>
+
+                <button
+                    onClick={async () => {
+                        if (!user) {
+                            alert('Not logged in');
+                            return;
+                        }
+                        alert(`User ID: ${user.id}\nEmail: ${user.email}`);
+                    }}
+                    className="w-full px-4 py-3 border border-neutral-700 rounded-lg text-sm text-white hover:border-[#C1FF72] hover:text-[#C1FF72] transition-colors text-left"
+                >
+                    {lang === 'tr' ? '3. Kullanıcı ID\'sini göster' : '3. Show user ID'}
+                </button>
             </div>
         </div>
 

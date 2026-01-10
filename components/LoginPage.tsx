@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Mail, Lock, Loader2, Eye, EyeOff, CheckCircle, KeyRound, Hash } from 'lucide-react';
 import { Button } from './Button';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LoginPageProps {
   lang: 'en' | 'tr';
@@ -13,13 +14,17 @@ interface LoginPageProps {
 type LoginView = 'login' | 'email' | 'code' | 'password' | 'success';
 
 export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClick, onLoginSuccess }) => {
+  const { signIn } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  
+
   // State Management
   const [view, setView] = useState<LoginView>('login');
   const [resetEmail, setResetEmail] = useState('');
@@ -96,13 +101,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
   const text = t[lang];
 
   // Login Submit
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-        setIsLoading(false);
-        if (onLoginSuccess) onLoginSuccess();
-    }, 1500);
+    setError('');
+
+    const { error } = await signIn(email, password);
+
+    if (error) {
+      setError(error.message);
+      setIsLoading(false);
+    } else {
+      setIsLoading(false);
+      if (onLoginSuccess) onLoginSuccess();
+    }
   };
 
   // Step 1: Send Code
@@ -174,13 +186,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
+                  {error}
+                </div>
+              )}
+
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-neutral-300 flex items-center gap-2">
                   <Mail className="w-3.5 h-3.5 text-[#C1FF72]" />
                   {text.emailLabel}
                 </label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder={text.emailPlaceholder}
                   className="w-full h-12 px-4 bg-[#0F0F0F] border border-neutral-800 rounded-xl text-white text-sm placeholder-neutral-600 focus:border-[#C1FF72] focus:ring-1 focus:ring-[#C1FF72] outline-none transition-all"
                   required
@@ -192,10 +212,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ lang, onBack, onSignupClic
                   <Lock className="w-3.5 h-3.5 text-[#C1FF72]" />
                   {text.passLabel}
                 </label>
-                
+
                 <div className="relative">
-                  <input 
+                  <input
                     type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder={text.passPlaceholder}
                     className="w-full h-12 px-4 bg-[#0F0F0F] border border-neutral-800 rounded-xl text-white text-sm placeholder-neutral-600 focus:border-[#C1FF72] focus:ring-1 focus:ring-[#C1FF72] outline-none transition-all pr-10"
                     required

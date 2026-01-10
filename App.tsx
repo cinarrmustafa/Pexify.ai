@@ -9,6 +9,7 @@ import { DashboardPage } from './components/DashboardPage';
 import { PaymentPage } from './components/PaymentPage';
 import { ContactPage } from './components/ContactPage';
 import { ScheduleDemoPage } from './components/ScheduleDemoPage';
+import { useAuth } from './contexts/AuthContext';
 
 // --- Translations ---
 
@@ -804,6 +805,7 @@ const Footer = ({ lang, onLoginClick, onOpenLegal, onContactClick, onScrollToSec
 // --- Main App Component ---
 
 const App: React.FC = () => {
+  const { user, loading, signOut } = useAuth();
   const [language, setLanguage] = useState<Language>('en');
   const [currentView, setCurrentView] = useState<View>('landing');
   const [legalModalId, setLegalModalId] = useState<string | null>(null);
@@ -812,6 +814,12 @@ const App: React.FC = () => {
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
   }, [currentView]);
+
+  useEffect(() => {
+    if (user && currentView === 'landing') {
+      setCurrentView('dashboard');
+    }
+  }, [user]);
 
   const handleSignup = () => {
     // Direct signup without selecting a plan first (e.g. from hero)
@@ -867,12 +875,27 @@ const App: React.FC = () => {
   };
 
   const renderView = () => {
+    if (loading) {
+      return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="text-white">Loading...</div>
+        </div>
+      );
+    }
+
     switch (currentView) {
       case 'dashboard':
+        if (!user) {
+          setCurrentView('login');
+          return null;
+        }
         return (
-          <DashboardPage 
+          <DashboardPage
             lang={language}
-            onLogout={() => setCurrentView('landing')}
+            onLogout={async () => {
+              await signOut();
+              setCurrentView('landing');
+            }}
             setLang={setLanguage}
           />
         );
