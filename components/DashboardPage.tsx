@@ -938,6 +938,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
                   currentPlanName={getLocalizedPlanName()}
                   currency={currency}
                   onCurrencyChange={setCurrency}
+                  user={user}
                 />
               )}
               {activeTab === 'upgrade' && (
@@ -2182,8 +2183,9 @@ const AnalyticsView = ({ lang, currency }: { lang: 'en' | 'tr', currency: { code
   );
 };
 
-const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNotification, onUpgradeClick, currentPlanName, currency, onCurrencyChange }: any) => {
+const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNotification, onUpgradeClick, currentPlanName, currency, onCurrencyChange, user }: any) => {
   const fileRef = useRef<HTMLInputElement>(null);
+  const [testUserId, setTestUserId] = useState<string | null>(null);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -2348,13 +2350,17 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
                     : 'RLS and Storage security test functions.'}
             </p>
 
+            {!user && (
+                <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-yellow-400 text-sm mb-4">
+                    {lang === 'tr' ? 'Testleri çalıştırmak için giriş yapmalısınız.' : 'Login required to run tests.'}
+                </div>
+            )}
+
             <div className="space-y-4">
                 <button
+                    disabled={!user}
                     onClick={async () => {
-                        if (!user) {
-                            alert('Not logged in');
-                            return;
-                        }
+                        if (!user) return;
                         try {
                             const testPath = `someone-else-uid/test-unauthorized.txt`;
                             const blob = new Blob(['test'], { type: 'text/plain' });
@@ -2363,25 +2369,27 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
                                 .upload(testPath, blob);
 
                             if (error) {
-                                alert(`✅ PASS: Upload to another user's folder blocked: ${error.message}`);
+                                alert(`PASS: Upload to another user's folder blocked: ${error.message}`);
                             } else {
-                                alert('❌ FAIL: Was able to upload to another user folder!');
+                                alert('FAIL: Was able to upload to another user folder!');
                             }
                         } catch (e: any) {
-                            alert(`✅ PASS: Upload blocked with exception: ${e.message}`);
+                            alert(`PASS: Upload blocked with exception: ${e.message}`);
                         }
                     }}
-                    className="w-full px-4 py-3 border border-neutral-700 rounded-lg text-sm text-white hover:border-[#C1FF72] hover:text-[#C1FF72] transition-colors text-left"
+                    className={`w-full px-4 py-3 border rounded-lg text-sm text-left transition-colors ${
+                        user
+                            ? 'border-neutral-700 text-white hover:border-[#C1FF72] hover:text-[#C1FF72]'
+                            : 'border-neutral-800 text-neutral-600 cursor-not-allowed'
+                    }`}
                 >
                     {lang === 'tr' ? '1. Başka kullanıcı klasörüne yazma testi (403 bekleniyor)' : '1. Test upload to another user folder (expect 403)'}
                 </button>
 
                 <button
+                    disabled={!user}
                     onClick={async () => {
-                        if (!user) {
-                            alert('Not logged in');
-                            return;
-                        }
+                        if (!user) return;
                         try {
                             const { data, error } = await supabase
                                 .from('user_documents')
@@ -2389,36 +2397,51 @@ const SettingsView = ({ lang, avatar, onAvatarChange, notifications, onToggleNot
                                 .limit(10);
 
                             if (error) {
-                                alert(`❌ FAIL: Could not fetch documents: ${error.message}`);
+                                alert(`FAIL: Could not fetch documents: ${error.message}`);
                             } else {
-                                const allOwnedByMe = data.every(doc => doc.user_id === user.id);
+                                const allOwnedByMe = data.every((doc: any) => doc.user_id === user.id);
                                 if (allOwnedByMe) {
-                                    alert(`✅ PASS: All ${data.length} documents belong to current user`);
+                                    alert(`PASS: All ${data.length} documents belong to current user`);
                                 } else {
-                                    alert(`❌ FAIL: Some documents belong to other users!`);
+                                    alert(`FAIL: Some documents belong to other users!`);
                                 }
                             }
                         } catch (e: any) {
-                            alert(`❌ FAIL: ${e.message}`);
+                            alert(`FAIL: ${e.message}`);
                         }
                     }}
-                    className="w-full px-4 py-3 border border-neutral-700 rounded-lg text-sm text-white hover:border-[#C1FF72] hover:text-[#C1FF72] transition-colors text-left"
+                    className={`w-full px-4 py-3 border rounded-lg text-sm text-left transition-colors ${
+                        user
+                            ? 'border-neutral-700 text-white hover:border-[#C1FF72] hover:text-[#C1FF72]'
+                            : 'border-neutral-800 text-neutral-600 cursor-not-allowed'
+                    }`}
                 >
                     {lang === 'tr' ? '2. Sadece kendi belgelerini görme testi' : '2. Test list only own documents'}
                 </button>
 
                 <button
-                    onClick={async () => {
-                        if (!user) {
-                            alert('Not logged in');
-                            return;
-                        }
-                        alert(`User ID: ${user.id}\nEmail: ${user.email}`);
+                    disabled={!user}
+                    onClick={() => {
+                        if (!user) return;
+                        setTestUserId(testUserId ? null : user.id);
                     }}
-                    className="w-full px-4 py-3 border border-neutral-700 rounded-lg text-sm text-white hover:border-[#C1FF72] hover:text-[#C1FF72] transition-colors text-left"
+                    className={`w-full px-4 py-3 border rounded-lg text-sm text-left transition-colors ${
+                        user
+                            ? 'border-neutral-700 text-white hover:border-[#C1FF72] hover:text-[#C1FF72]'
+                            : 'border-neutral-800 text-neutral-600 cursor-not-allowed'
+                    }`}
                 >
                     {lang === 'tr' ? '3. Kullanıcı ID\'sini göster' : '3. Show user ID'}
                 </button>
+
+                {testUserId && user && (
+                    <div className="mt-4 p-4 bg-[#0F0F0F] border border-neutral-800 rounded-lg">
+                        <p className="text-xs text-neutral-500 uppercase mb-2">User ID</p>
+                        <p className="text-sm text-[#C1FF72] font-mono break-all">{user.id}</p>
+                        <p className="text-xs text-neutral-500 uppercase mt-3 mb-2">Email</p>
+                        <p className="text-sm text-white">{user.email}</p>
+                    </div>
+                )}
             </div>
         </div>
 
