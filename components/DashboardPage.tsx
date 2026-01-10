@@ -22,6 +22,7 @@ interface Doc {
   issues: number | null;
   tags: string[];
   fileUrl?: string; // URL for previewing the file
+  filePath?: string; // Storage path for signed URL generation
 }
 
 type PlanType = 'Starter' | 'Growth' | 'Enterprise';
@@ -521,10 +522,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
           throw dbError;
         }
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('secure-docs')
-          .getPublicUrl(storagePath);
-
         return {
           id: dbData.id,
           name: file.name,
@@ -534,7 +531,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
           status: "queued" as const,
           issues: null,
           tags: [],
-          fileUrl: publicUrl
+          filePath: storagePath
         };
       } catch (error) {
         console.error('Error uploading file:', file.name, error);
@@ -1028,9 +1025,44 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose, onUpdate }: { doc: 
   const [isEditing, setIsEditing] = useState(false);
   const [editedDoc, setEditedDoc] = useState(doc);
   const [isSaving, setIsSaving] = useState(false);
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
 
-  const isImage = doc.fileUrl && (doc.name.toLowerCase().endsWith('.jpg') || doc.name.toLowerCase().endsWith('.png') || doc.name.toLowerCase().endsWith('.jpeg'));
-  const isPdf = doc.fileUrl && doc.name.toLowerCase().endsWith('.pdf');
+  useEffect(() => {
+    const generateSignedUrl = async () => {
+      if (!doc.filePath) {
+        setPreviewError(lang === 'tr' ? 'Dosya yolu bulunamadi.' : 'File path not found.');
+        return;
+      }
+
+      setLoadingPreview(true);
+      setPreviewError(null);
+
+      const { data, error } = await supabase.storage
+        .from('secure-docs')
+        .createSignedUrl(doc.filePath, 60);
+
+      if (error || !data?.signedUrl) {
+        setPreviewError(lang === 'tr' ? 'Dosya onizleme basarisiz (private bucket).' : 'File preview failed (private bucket).');
+        console.error('Signed URL error:', error);
+      } else {
+        setSignedUrl(data.signedUrl);
+      }
+
+      setLoadingPreview(false);
+    };
+
+    generateSignedUrl();
+
+    return () => {
+      setSignedUrl(null);
+      setPreviewError(null);
+    };
+  }, [doc.filePath, lang]);
+
+  const isImage = doc.name.toLowerCase().endsWith('.jpg') || doc.name.toLowerCase().endsWith('.png') || doc.name.toLowerCase().endsWith('.jpeg') || doc.name.toLowerCase().endsWith('.gif') || doc.name.toLowerCase().endsWith('.webp');
+  const isPdf = doc.name.toLowerCase().endsWith('.pdf');
 
   const documentTypes = [
     { value: 'Invoice', label: lang === 'tr' ? 'Fatura' : 'Invoice' },
@@ -1105,15 +1137,32 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose, onUpdate }: { doc: 
       <div className="bg-[#0F0F0F] border border-neutral-800 rounded-3xl w-full max-w-4xl relative z-10 shadow-2xl p-6 flex flex-col md:flex-row gap-8 max-h-[90vh]">
         {/* Left: Preview */}
         <div className="flex-1 bg-neutral-900/50 rounded-2xl border border-neutral-800 flex items-center justify-center min-h-[400px] relative overflow-hidden group">
-            {doc.fileUrl ? (
+            {loadingPreview ? (
+                <div className="flex flex-col items-center justify-center p-6 text-center">
+                    <div className="w-10 h-10 border-2 border-[#C1FF72] border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p className="text-neutral-400">{lang === 'tr' ? 'Yukleniyor...' : 'Loading...'}</p>
+                </div>
+            ) : previewError ? (
+                <div className="flex flex-col items-center justify-center p-6 text-center">
+                    <FileText className="w-16 h-16 text-red-500/50 mb-4" />
+                    <p className="text-red-400 text-sm">{previewError}</p>
+                </div>
+            ) : signedUrl ? (
                 isImage ? (
-                    <img src={doc.fileUrl} alt={doc.name} className="w-full h-full object-contain" />
+                    <img src={signedUrl} alt={doc.name} className="w-full h-full object-contain" />
                 ) : isPdf ? (
-                    <iframe src={doc.fileUrl} className="w-full h-full rounded-2xl" title={doc.name}></iframe>
+                    <iframe src={signedUrl} className="w-full h-full rounded-2xl" title={doc.name}></iframe>
                 ) : (
                     <div className="flex flex-col items-center justify-center p-6 text-center">
                         <FileText className="w-16 h-16 text-neutral-600 mb-4" />
-                        <p className="text-neutral-400">{text.noPreview}</p>
+                        <p className="text-neutral-400 mb-4">{text.noPreview}</p>
+                        <a
+                            href={signedUrl}
+                            download={doc.name}
+                            className="px-4 py-2 bg-[#C1FF72] text-black rounded-lg text-sm font-medium hover:bg-[#A8E65C] transition-colors"
+                        >
+                            {lang === 'tr' ? 'Indir' : 'Download'}
+                        </a>
                     </div>
                 )
             ) : (
