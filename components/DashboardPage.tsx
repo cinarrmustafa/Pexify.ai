@@ -502,7 +502,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
 
   const handleFileUpload = async (files: File[]) => {
     if (!user) {
-      alert('You must be logged in to upload files');
+      alert(lang === 'tr' ? 'Dosya yüklemek için giriş yapmalısınız' : 'You must be logged in to upload files');
       return;
     }
 
@@ -538,7 +538,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
         const { data: dbData, error: dbError } = await supabase
           .from('documents')
           .insert({
-            user_id: uid,
             file_path: storagePath,
             file_name: file.name,
             name: file.name,
