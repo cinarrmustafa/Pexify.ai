@@ -1026,11 +1026,14 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose, onUpdate }: { doc: 
   const [editedDoc, setEditedDoc] = useState(doc);
   const [isSaving, setIsSaving] = useState(false);
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
 
   useEffect(() => {
-    const generateSignedUrl = async () => {
+    let currentBlobUrl: string | null = null;
+
+    const loadFilePreview = async () => {
       if (!doc.filePath) {
         setPreviewError(lang === 'tr' ? 'Dosya yolu bulunamadi.' : 'File path not found.');
         return;
@@ -1039,24 +1042,45 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose, onUpdate }: { doc: 
       setLoadingPreview(true);
       setPreviewError(null);
 
-      const { data, error } = await supabase.storage
-        .from('secure-docs')
-        .createSignedUrl(doc.filePath, 60);
+      try {
+        const { data, error } = await supabase.storage
+          .from('secure-docs')
+          .createSignedUrl(doc.filePath, 300);
 
-      if (error || !data?.signedUrl) {
-        setPreviewError(lang === 'tr' ? 'Dosya onizleme basarisiz (private bucket).' : 'File preview failed (private bucket).');
-        console.error('Signed URL error:', error);
-      } else {
+        if (error || !data?.signedUrl) {
+          setPreviewError(lang === 'tr' ? 'Dosya onizleme basarisiz (private bucket).' : 'File preview failed (private bucket).');
+          console.error('Signed URL error:', error);
+          setLoadingPreview(false);
+          return;
+        }
+
         setSignedUrl(data.signedUrl);
-      }
 
-      setLoadingPreview(false);
+        const response = await fetch(data.signedUrl);
+        if (!response.ok) {
+          throw new Error('Failed to fetch file');
+        }
+
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        currentBlobUrl = objectUrl;
+        setBlobUrl(objectUrl);
+      } catch (error) {
+        console.error('Error loading file preview:', error);
+        setPreviewError(lang === 'tr' ? 'Dosya yukleme hatasi.' : 'File loading error.');
+      } finally {
+        setLoadingPreview(false);
+      }
     };
 
-    generateSignedUrl();
+    loadFilePreview();
 
     return () => {
+      if (currentBlobUrl) {
+        URL.revokeObjectURL(currentBlobUrl);
+      }
       setSignedUrl(null);
+      setBlobUrl(null);
       setPreviewError(null);
     };
   }, [doc.filePath, lang]);
@@ -1145,24 +1169,55 @@ const ViewDocModal = ({ doc, lang, text, statusMap, onClose, onUpdate }: { doc: 
             ) : previewError ? (
                 <div className="flex flex-col items-center justify-center p-6 text-center">
                     <FileText className="w-16 h-16 text-red-500/50 mb-4" />
-                    <p className="text-red-400 text-sm">{previewError}</p>
+                    <p className="text-red-400 text-sm mb-4">{previewError}</p>
+                    {signedUrl && (
+                        <div className="flex gap-3">
+                            <a
+                                href={signedUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-4 py-2 bg-neutral-800 text-white rounded-lg text-sm font-medium hover:bg-neutral-700 transition-colors"
+                            >
+                                {lang === 'tr' ? 'Ac' : 'Open'}
+                            </a>
+                            <a
+                                href={signedUrl}
+                                download={doc.name}
+                                className="px-4 py-2 bg-[#C1FF72] text-black rounded-lg text-sm font-medium hover:bg-[#A8E65C] transition-colors"
+                            >
+                                {lang === 'tr' ? 'Indir' : 'Download'}
+                            </a>
+                        </div>
+                    )}
                 </div>
-            ) : signedUrl ? (
+            ) : blobUrl ? (
                 isImage ? (
-                    <img src={signedUrl} alt={doc.name} className="w-full h-full object-contain" />
+                    <img src={blobUrl} alt={doc.name} className="w-full h-full object-contain" />
                 ) : isPdf ? (
-                    <iframe src={signedUrl} className="w-full h-full rounded-2xl" title={doc.name}></iframe>
+                    <iframe src={blobUrl} className="w-full h-full rounded-2xl" title={doc.name}></iframe>
                 ) : (
                     <div className="flex flex-col items-center justify-center p-6 text-center">
                         <FileText className="w-16 h-16 text-neutral-600 mb-4" />
                         <p className="text-neutral-400 mb-4">{text.noPreview}</p>
-                        <a
-                            href={signedUrl}
-                            download={doc.name}
-                            className="px-4 py-2 bg-[#C1FF72] text-black rounded-lg text-sm font-medium hover:bg-[#A8E65C] transition-colors"
-                        >
-                            {lang === 'tr' ? 'Indir' : 'Download'}
-                        </a>
+                        <div className="flex gap-3">
+                            {signedUrl && (
+                                <a
+                                    href={signedUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-4 py-2 bg-neutral-800 text-white rounded-lg text-sm font-medium hover:bg-neutral-700 transition-colors"
+                                >
+                                    {lang === 'tr' ? 'Ac' : 'Open'}
+                                </a>
+                            )}
+                            <a
+                                href={blobUrl}
+                                download={doc.name}
+                                className="px-4 py-2 bg-[#C1FF72] text-black rounded-lg text-sm font-medium hover:bg-[#A8E65C] transition-colors"
+                            >
+                                {lang === 'tr' ? 'Indir' : 'Download'}
+                            </a>
+                        </div>
                     </div>
                 )
             ) : (
