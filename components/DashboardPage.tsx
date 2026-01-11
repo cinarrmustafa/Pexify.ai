@@ -517,7 +517,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
 
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from(DOCUMENTS_BUCKET)
-          .upload(storagePath, file);
+          .upload(storagePath, file, {
+            contentType: file.type,
+            upsert: false,
+          });
 
         if (uploadError) {
           console.error('Upload error:', uploadError);
