@@ -196,7 +196,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
             status: doc.status as 'verified' | 'risk' | 'processing' | 'queued',
             issues: doc.status === 'risk' ? 1 : 0,
             tags: doc.tags || [],
-            fileUrl: doc.file_url
+            fileUrl: doc.file_url,
+            filePath: doc.file_path
           }));
           setAllDocs(formattedDocs);
         }
@@ -509,6 +510,23 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
 
     const uploadPromises = files.map(async (file, i) => {
       try {
+        // Validate MIME type against bucket allowlist
+        const allowedMimeTypes = [
+          'application/pdf',
+          'image/jpeg',
+          'image/jpg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/msword',
+          'text/plain'
+        ];
+
+        if (!file.type || !allowedMimeTypes.includes(file.type)) {
+          throw new Error(`File type ${file.type || 'unknown'} is not allowed. Please upload PDF, images, or Word documents.`);
+        }
+
         const uid = user.id;
         const uniqueId = crypto.randomUUID();
         const fileExt = file.name.split('.').pop();
@@ -571,8 +589,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
           tags: [],
           filePath: storagePath
         };
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error uploading file:', file.name, error);
+        const errorMsg = lang === 'tr'
+          ? `Yükleme başarısız: ${file.name} - ${error.message || 'Bilinmeyen hata'}`
+          : `Upload failed: ${file.name} - ${error.message || 'Unknown error'}`;
+        alert(errorMsg);
         return null;
       }
     });
@@ -580,7 +602,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ lang, onLogout, se
     const uploadedDocs = (await Promise.all(uploadPromises)).filter(doc => doc !== null) as Doc[];
 
     if (uploadedDocs.length > 0) {
-      setAllDocs(prev => [...uploadedDocs, ...prev]);
+      // Reload from database to get all server-generated fields (user_id, created_at, etc.)
+      await loadUserDocuments();
       setActiveTab('dashboard');
     }
   };
