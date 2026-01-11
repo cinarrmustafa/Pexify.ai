@@ -48,7 +48,7 @@ CREATE POLICY "documents_select_own"
   TO authenticated
   USING (
     bucket_id = 'documents'
-    AND (storage.foldername(name))[1] = auth.uid()::text
+    AND (storage.foldername(name))[0] = auth.uid()::text
   );
 
 -- INSERT: Users can only upload to their own folder
@@ -58,7 +58,7 @@ CREATE POLICY "documents_insert_own"
   TO authenticated
   WITH CHECK (
     bucket_id = 'documents'
-    AND (storage.foldername(name))[1] = auth.uid()::text
+    AND (storage.foldername(name))[0] = auth.uid()::text
   );
 
 -- UPDATE: Users can only update/move their own files
@@ -68,11 +68,11 @@ CREATE POLICY "documents_update_own"
   TO authenticated
   USING (
     bucket_id = 'documents'
-    AND (storage.foldername(name))[1] = auth.uid()::text
+    AND (storage.foldername(name))[0] = auth.uid()::text
   )
   WITH CHECK (
     bucket_id = 'documents'
-    AND (storage.foldername(name))[1] = auth.uid()::text
+    AND (storage.foldername(name))[0] = auth.uid()::text
   );
 
 -- DELETE: Users can only delete their own files
@@ -82,5 +82,5 @@ CREATE POLICY "documents_delete_own"
   TO authenticated
   USING (
     bucket_id = 'documents'
-    AND (storage.foldername(name))[1] = auth.uid()::text
+    AND (storage.foldername(name))[0] = auth.uid()::text
   );
